@@ -1,4 +1,4 @@
-import { Home, Bell, Wallet, User, Search, MessageCircle, MoreHorizontal } from "lucide-react";
+import { Home, Bell, Wallet, User, Search, MessageCircle, MoreHorizontal, Coins, ArrowUpDown } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
 import {
@@ -18,6 +18,8 @@ const items = [
   { title: "Home", url: "/home", icon: Home },
   { title: "Notifications", url: "/notifications", icon: Bell },
   { title: "Wallet", url: "/wallet", icon: Wallet },
+  { title: "Staking", url: "/staking", icon: Coins },
+  { title: "Swap", url: "/swap", icon: ArrowUpDown },
   { title: "More", url: "/more", icon: MoreHorizontal },
 ];
 

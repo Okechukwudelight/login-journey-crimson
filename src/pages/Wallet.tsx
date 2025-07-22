@@ -34,7 +34,7 @@ const Wallet = () => {
               </div>
 
               {/* Portfolio Value and Action Buttons */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-4">
                 <Card className="bg-card/50 border border-border/50">
                   <CardContent className="p-4">
                     <p className="text-sm text-muted-foreground mb-1">Portfolio Value</p>
@@ -43,34 +43,14 @@ const Wallet = () => {
                 </Card>
                 
                 <div className="grid grid-cols-2 gap-3">
-                  <Button variant="outline" className="h-auto py-4">
+                  <Button variant="outline" className="h-10 px-6 rounded-lg">
                     <span className="text-sm font-medium">Deposit</span>
                   </Button>
-                  <Button variant="outline" className="h-auto py-4">
+                  <Button variant="outline" className="h-10 px-6 rounded-lg">
                     <span className="text-sm font-medium">Withdraw</span>
                   </Button>
                 </div>
               </div>
-
-              {/* Total Balance Card */}
-              <Card className="bg-gradient-to-r from-violet-600 to-purple-600 text-white border-0">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-white/80 mb-1">Total Balance</p>
-                      <div className="flex items-center gap-2">
-                        <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
-                          <span className="text-xs font-bold">A</span>
-                        </div>
-                        <span className="text-2xl font-bold">0.00</span>
-                      </div>
-                    </div>
-                    <Button variant="secondary" className="bg-white/20 text-white border-white/30 hover:bg-white/30">
-                      Arena Portal
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
 
               {/* Tabs Section */}
               <Tabs defaultValue="tokens" className="w-full">
