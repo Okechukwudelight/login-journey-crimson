@@ -35,24 +35,24 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2 pt-8">
+      <SidebarContent className="px-2 pt-16">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild className="h-12">
-                    <NavLink 
-                      to={item.url} 
-                      className={({ isActive }) => 
-                        `flex items-center gap-4 px-4 py-3 rounded-full transition-all duration-200 text-lg ${
-                          isActive 
-                            ? "bg-primary/10 text-primary font-semibold" 
-                            : "hover:bg-muted/50 text-foreground"
-                        }`
-                      }
-                    >
-                      <item.icon className="h-6 w-6" />
+                     <NavLink 
+                       to={item.url} 
+                       className={({ isActive }) => 
+                         `flex items-center gap-4 px-4 py-3 rounded-full transition-all duration-200 text-xl font-bold ${
+                           isActive 
+                             ? "bg-primary/10 text-primary" 
+                             : "hover:bg-muted/50 text-foreground"
+                         }`
+                       }
+                     >
+                      <item.icon className="h-7 w-7 font-bold" strokeWidth={2.5} />
                       <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
