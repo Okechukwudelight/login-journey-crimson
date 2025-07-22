@@ -16,9 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const items = [
   { title: "Home", url: "/home", icon: Home },
-  { title: "Explore", url: "/explore", icon: Search },
   { title: "Notifications", url: "/notifications", icon: Bell },
-  { title: "Messages", url: "/messages", icon: MessageCircle },
   { title: "Wallet", url: "/wallet", icon: Wallet },
   { title: "More", url: "/more", icon: MoreHorizontal },
 ];
@@ -37,7 +35,7 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-2">
+      <SidebarContent className="px-2 pt-8">
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu className="space-y-1">
