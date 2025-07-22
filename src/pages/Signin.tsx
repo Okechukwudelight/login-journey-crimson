@@ -5,33 +5,24 @@ import googleLogo from "@/assets/google-logo.png";
 import metamaskLogo from "@/assets/metamask-logo.svg";
 import coreWalletLogo from "/lovable-uploads/e86c25ac-3589-408e-a716-131ab21a5d5c.png";
 
-const Signup = () => {
+const Signin = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-foreground">Sign Up</h1>
-          <p className="text-muted-foreground mt-2">Create your account to get started</p>
+          <h1 className="text-2xl font-bold text-foreground">Sign In</h1>
+          <p className="text-muted-foreground mt-2">Welcome back to your account</p>
         </div>
 
         <form className="space-y-4">
-          {/* Email Input with Send Code */}
+          {/* Email Input */}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <div className="relative">
-              <Input
-                id="email"
-                type="email"
-                placeholder="Enter your email"
-                className="pr-20"
-              />
-              <button
-                type="button"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-primary hover:text-primary/80 transition-colors"
-              >
-                Send Code
-              </button>
-            </div>
+            <Input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+            />
           </div>
 
           {/* Password Input */}
@@ -44,19 +35,9 @@ const Signup = () => {
             />
           </div>
 
-          {/* Code Input */}
-          <div className="space-y-2">
-            <Label htmlFor="code">Verification Code</Label>
-            <Input
-              id="code"
-              type="text"
-              placeholder="Enter verification code"
-            />
-          </div>
-
-          {/* Register Button */}
+          {/* Sign In Button */}
           <Button type="submit" className="w-full">
-            Register
+            Sign In
           </Button>
         </form>
 
@@ -80,11 +61,11 @@ const Signup = () => {
           </div>
         </div>
 
-        {/* Sign In Link */}
+        {/* Sign Up Link */}
         <div className="text-center text-sm">
-          <span className="text-muted-foreground">Already have an account? </span>
-          <a href="/signin" className="text-primary hover:text-primary/80 transition-colors">
-            Sign in
+          <span className="text-muted-foreground">Don't have an account? </span>
+          <a href="/signup" className="text-primary hover:text-primary/80 transition-colors">
+            Sign up
           </a>
         </div>
       </div>
@@ -92,4 +73,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default Signin;
