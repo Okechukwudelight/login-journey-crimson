@@ -1,4 +1,4 @@
-import { Home, Bell, Wallet, User } from "lucide-react";
+import { Home, Bell, Wallet, User, Search, MessageCircle, MoreHorizontal } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
 import {
@@ -9,42 +9,53 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarHeader,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const items = [
   { title: "Home", url: "/home", icon: Home },
+  { title: "Explore", url: "/explore", icon: Search },
   { title: "Notifications", url: "/notifications", icon: Bell },
+  { title: "Messages", url: "/messages", icon: MessageCircle },
   { title: "Wallet", url: "/wallet", icon: Wallet },
-  { title: "Profile", url: "/profile", icon: User },
+  { title: "More", url: "/more", icon: MoreHorizontal },
 ];
 
 export function AppSidebar() {
   const location = useLocation();
   const currentPath = location.pathname;
 
-  const isActive = (path: string) => currentPath === path;
-  const getNavCls = ({ isActive }: { isActive: boolean }) =>
-    isActive ? "bg-primary text-primary-foreground" : "hover:bg-muted/50";
-
   return (
-    <Sidebar className="w-64 border-r">
-      <SidebarContent>
+    <Sidebar className="w-64 bg-background border-r border-border">
+      <SidebarHeader className="p-4">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+            <span className="text-primary-foreground font-bold text-lg">A</span>
+          </div>
+        </div>
+      </SidebarHeader>
+
+      <SidebarContent className="px-2">
         <SidebarGroup>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="space-y-1">
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild className="h-12">
                     <NavLink 
                       to={item.url} 
                       className={({ isActive }) => 
-                        `flex items-center gap-3 px-4 py-3 rounded-md transition-colors ${
-                          isActive ? "bg-primary text-primary-foreground" : "hover:bg-muted/50"
+                        `flex items-center gap-4 px-4 py-3 rounded-full transition-all duration-200 text-lg ${
+                          isActive 
+                            ? "bg-primary/10 text-primary font-semibold" 
+                            : "hover:bg-muted/50 text-foreground"
                         }`
                       }
                     >
-                      <item.icon className="h-5 w-5" />
-                      <span className="font-medium">{item.title}</span>
+                      <item.icon className="h-6 w-6" />
+                      <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -53,6 +64,30 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+
+      <SidebarFooter className="p-4">
+        <NavLink 
+          to="/profile"
+          className={({ isActive }) => 
+            `flex items-center gap-3 p-3 rounded-full transition-all duration-200 ${
+              isActive 
+                ? "bg-primary/10 text-primary" 
+                : "hover:bg-muted/50"
+            }`
+          }
+        >
+          <Avatar className="h-10 w-10">
+            <AvatarImage src="" />
+            <AvatarFallback className="bg-primary text-primary-foreground">
+              U
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <span className="font-semibold text-sm">Profile</span>
+            <span className="text-xs text-muted-foreground">@username</span>
+          </div>
+        </NavLink>
+      </SidebarFooter>
     </Sidebar>
   );
 }

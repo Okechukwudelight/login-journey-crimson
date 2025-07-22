@@ -22,8 +22,11 @@ const App = () => (
           <Route path="/signin" element={<Signin />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/home" element={<Home />} />
+          <Route path="/explore" element={<Home />} />
           <Route path="/notifications" element={<Home />} />
+          <Route path="/messages" element={<Home />} />
           <Route path="/wallet" element={<Home />} />
+          <Route path="/more" element={<Home />} />
           <Route path="/profile" element={<Home />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
