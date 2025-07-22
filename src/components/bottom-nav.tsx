@@ -1,10 +1,11 @@
-import { Home, Bell, Wallet, User } from "lucide-react";
+import { Home, Bell, Wallet, User, Coins, ArrowUpDown } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 const items = [
   { title: "Home", url: "/home", icon: Home },
-  { title: "Notifications", url: "/notifications", icon: Bell },
   { title: "Wallet", url: "/wallet", icon: Wallet },
+  { title: "Staking", url: "/staking", icon: Coins },
+  { title: "Swap", url: "/swap", icon: ArrowUpDown },
   { title: "Profile", url: "/profile", icon: User },
 ];
 

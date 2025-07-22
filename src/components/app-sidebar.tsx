@@ -31,8 +31,12 @@ export function AppSidebar() {
     <Sidebar className="w-64 bg-background border-r border-border">
       <SidebarHeader className="p-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-lg">A</span>
+          <div className="w-8 h-8 rounded-lg overflow-hidden">
+            <img 
+              src="/lovable-uploads/5ed9a2ee-483e-4d95-a60c-195ec760e9a5.png" 
+              alt="Logo" 
+              className="w-full h-full object-cover"
+            />
           </div>
         </div>
       </SidebarHeader>
