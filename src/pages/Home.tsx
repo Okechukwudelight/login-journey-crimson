@@ -22,7 +22,7 @@ const Home = () => {
                 <div className="bg-notification rounded-full p-2">
                   <Bell className="h-6 w-6 text-notification-foreground" />
                 </div>
-                <div className="absolute -top-1 -right-1 bg-notification text-notification-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                <div className="absolute -top-1 -right-1 bg-[#7D0101] text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
                   3
                 </div>
               </div>

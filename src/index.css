@@ -56,6 +56,7 @@ All colors MUST be HSL.
     
     --notification: 0 74% 42%;
     --notification-foreground: 0 0% 100%;
+    --custom-red: 0 98% 25%;
   }
 
   .dark {
@@ -96,6 +97,7 @@ All colors MUST be HSL.
     --sidebar-ring: 217.2 91.2% 59.8%;
     --notification: 0 74% 42%;
     --notification-foreground: 0 0% 100%;
+    --custom-red: 0 98% 25%;
   }
 }
 
