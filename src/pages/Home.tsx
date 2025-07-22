@@ -1,6 +1,7 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { BottomNav } from "@/components/bottom-nav";
+import { Bell } from "lucide-react";
 
 const Home = () => {
   return (
@@ -14,8 +15,22 @@ const Home = () => {
 
           {/* Main Content */}
           <main className="flex-1 p-6 pb-20 md:pb-6">
+            {/* Mobile Header with Notification */}
+            <div className="md:hidden flex justify-between items-center mb-6">
+              <h1 className="text-3xl font-bold">Welcome Home</h1>
+              <div className="relative">
+                <div className="bg-notification rounded-full p-2">
+                  <Bell className="h-6 w-6 text-notification-foreground" />
+                </div>
+                <div className="absolute -top-1 -right-1 bg-notification text-notification-foreground text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
+                  3
+                </div>
+              </div>
+            </div>
+            
             <div className="max-w-4xl mx-auto">
-              <h1 className="text-3xl font-bold mb-6">Welcome Home</h1>
+              {/* Desktop Header */}
+              <h1 className="hidden md:block text-3xl font-bold mb-6">Welcome Home</h1>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <div className="bg-card rounded-lg p-6 border">
                   <h2 className="text-xl font-semibold mb-4">Dashboard</h2>

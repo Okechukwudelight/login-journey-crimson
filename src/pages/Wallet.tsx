@@ -43,10 +43,10 @@ const Wallet = () => {
                 </Card>
                 
                 <div className="grid grid-cols-2 gap-3">
-                  <Button variant="outline" className="h-10 px-6 rounded-lg">
+                  <Button variant="outline" className="h-10 px-6 rounded-lg border-notification hover:bg-notification/10">
                     <span className="text-sm font-medium">Deposit</span>
                   </Button>
-                  <Button variant="outline" className="h-10 px-6 rounded-lg">
+                  <Button variant="outline" className="h-10 px-6 rounded-lg border-notification hover:bg-notification/10">
                     <span className="text-sm font-medium">Withdraw</span>
                   </Button>
                 </div>
