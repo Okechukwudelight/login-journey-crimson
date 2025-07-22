@@ -27,7 +27,7 @@ const Signup = () => {
               />
               <button
                 type="button"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-primary hover:text-primary/80 transition-colors"
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-[#7D0101] hover:text-[#7D0101]/80 transition-colors"
               >
                 Send Code
               </button>
@@ -69,13 +69,13 @@ const Signup = () => {
           {/* Social Login Options */}
           <div className="flex justify-center items-center gap-6">
             <button className="flex items-center justify-center w-12 h-12 rounded-lg border border-border hover:bg-accent transition-colors">
-              <img src={googleLogo} alt="Google" className="w-6 h-6" />
+              <img src={googleLogo} alt="Google" className="w-6 h-6 rounded-full" />
             </button>
             <button className="flex items-center justify-center w-12 h-12 rounded-lg border border-border hover:bg-accent transition-colors">
-              <img src={metamaskLogo} alt="MetaMask" className="w-6 h-6" />
+              <img src={metamaskLogo} alt="MetaMask" className="w-6 h-6 rounded-full" />
             </button>
             <button className="flex items-center justify-center w-12 h-12 rounded-lg border border-border hover:bg-accent transition-colors">
-              <img src={coreWalletLogo} alt="Core Wallet" className="w-6 h-6" />
+              <img src={coreWalletLogo} alt="Core Wallet" className="w-6 h-6 rounded-full" />
             </button>
           </div>
         </div>

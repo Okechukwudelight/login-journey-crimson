@@ -50,13 +50,13 @@ const Signin = () => {
           {/* Social Login Options */}
           <div className="flex justify-center items-center gap-6">
             <button className="flex items-center justify-center w-12 h-12 rounded-lg border border-border hover:bg-accent transition-colors">
-              <img src={googleLogo} alt="Google" className="w-6 h-6" />
+              <img src={googleLogo} alt="Google" className="w-6 h-6 rounded-full" />
             </button>
             <button className="flex items-center justify-center w-12 h-12 rounded-lg border border-border hover:bg-accent transition-colors">
-              <img src={metamaskLogo} alt="MetaMask" className="w-6 h-6" />
+              <img src={metamaskLogo} alt="MetaMask" className="w-6 h-6 rounded-full" />
             </button>
             <button className="flex items-center justify-center w-12 h-12 rounded-lg border border-border hover:bg-accent transition-colors">
-              <img src={coreWalletLogo} alt="Core Wallet" className="w-6 h-6" />
+              <img src={coreWalletLogo} alt="Core Wallet" className="w-6 h-6 rounded-full" />
             </button>
           </div>
         </div>
