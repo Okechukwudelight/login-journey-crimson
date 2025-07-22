@@ -45,14 +45,14 @@ export function AppSidebar() {
                      <NavLink 
                        to={item.url} 
                        className={({ isActive }) => 
-                         `flex items-center gap-4 px-4 py-3 rounded-full transition-all duration-200 text-xl font-bold ${
+                         `flex items-center gap-4 px-4 py-3 rounded-full transition-all duration-200 text-xl ${
                            isActive 
-                             ? "bg-primary/10 text-primary" 
+                             ? "bg-primary/10 text-primary font-semibold" 
                              : "hover:bg-muted/50 text-foreground"
                          }`
                        }
                      >
-                      <item.icon className="h-7 w-7 font-bold" strokeWidth={2.5} />
+                      <item.icon className="h-7 w-7" />
                       <span>{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
