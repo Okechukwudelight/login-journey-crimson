@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Wallet from "./pages/Wallet";
 import Signup from "./pages/Signup";
 import Signin from "./pages/Signin";
+import Swap from "./pages/Swap";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,8 +26,10 @@ const App = () => (
           <Route path="/home" element={<Home />} />
           <Route path="/notifications" element={<Home />} />
           <Route path="/wallet" element={<Wallet />} />
+          <Route path="/swap" element={<Swap />} />
           <Route path="/more" element={<Home />} />
           <Route path="/profile" element={<Home />} />
+          <Route path="/staking" element={<Home />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
