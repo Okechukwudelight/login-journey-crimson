@@ -19,9 +19,6 @@ const Swap = () => {
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <h1 className="text-xl font-bold">Pay & Receive</h1>
-                <button className="flex items-center gap-1 bg-secondary/60 px-3 py-1 rounded-lg text-foreground">
-                  Crypto <ChevronDown className="h-4 w-4" />
-                </button>
               </div>
 
               {/* Swap Container */}
@@ -35,11 +32,14 @@ const Swap = () => {
                   
                   <div className="flex items-center justify-between bg-secondary/30 rounded-lg p-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">$</div>
-                      <span className="font-medium">USDC</span>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-white text-xs">A</div>
+                      <span className="font-medium">AVAX</span>
                     </div>
-                    <div className="text-xl font-medium text-right">1207</div>
+                    <input 
+                      type="text" 
+                      defaultValue="1207" 
+                      className="text-xl font-medium text-right bg-transparent border-none outline-none focus:ring-0" 
+                    />
                   </div>
 
                   <div className="flex justify-end">
@@ -65,16 +65,19 @@ const Swap = () => {
                     <div className="flex items-center gap-2">
                       <div className="w-6 h-6 bg-teal-500 rounded-full flex items-center justify-center text-white text-xs">T</div>
                       <span className="font-medium">USDT</span>
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
                     </div>
-                    <div className="text-xl font-medium text-right text-cyan-400">1206.73</div>
+                    <input 
+                      type="text" 
+                      defaultValue="1206.73" 
+                      className="text-xl font-medium text-right text-cyan-400 bg-transparent border-none outline-none focus:ring-0" 
+                    />
                   </div>
                 </div>
 
                 {/* Rate Info */}
                 <div className="flex items-center justify-between text-sm py-2 px-3 bg-secondary/20 rounded-lg">
                   <div className="flex items-center gap-1 text-muted-foreground">
-                    <span>1 USDT = 1.00021 USDC</span>
+                    <span>1 USDT = 1.00021 AVAX</span>
                     <Info className="h-3 w-3" />
                   </div>
                   <button className="text-muted-foreground flex items-center gap-1">
@@ -83,7 +86,7 @@ const Swap = () => {
                 </div>
 
                 {/* Swap Button */}
-                <button className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-medium">
+                <button className="w-full py-3 rounded-xl bg-[#7D0101] text-white font-medium">
                   Swap Now
                 </button>
               </div>
