@@ -3,8 +3,15 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { BottomNav } from "@/components/bottom-nav";
 import { ChevronDown, ArrowDownUp, Info } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useState } from "react";
 
 const Swap = () => {
+  const [isSwapped, setIsSwapped] = useState(false);
+
+  const handleSwap = () => {
+    setIsSwapped(!isSwapped);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <SidebarProvider>
@@ -33,12 +40,21 @@ const Swap = () => {
                   
                   <div className="flex items-center justify-between bg-secondary/30 rounded-lg p-3">
                     <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-red-600 rounded-full flex items-center justify-center text-white text-xs">A</div>
-                      <span className="font-medium">AVAX</span>
+                      {!isSwapped ? (
+                        <>
+                          <img src="/lovable-uploads/eed6b042-1aa0-4ad2-bda2-0ba7736494c6.png" alt="AVAX" className="w-6 h-6 rounded-full" />
+                          <span className="font-medium">AVAX</span>
+                        </>
+                      ) : (
+                        <>
+                          <img src="/lovable-uploads/2a45c57a-70e8-4c85-81d7-a9bf54acff10.png" alt="USDT" className="w-6 h-6 rounded-full" />
+                          <span className="font-medium">USDT</span>
+                        </>
+                      )}
                     </div>
                     <input 
                       type="text" 
-                      defaultValue="1207" 
+                      defaultValue={!isSwapped ? "1207" : "1206.73"}
                       className="text-xl font-medium text-right bg-transparent border-none outline-none focus:ring-0" 
                     />
                   </div>
@@ -50,9 +66,12 @@ const Swap = () => {
 
                 {/* Swap Icon */}
                 <div className="flex justify-center -my-2">
-                  <div className="bg-background p-3 rounded-full border border-border/50">
+                  <button 
+                    onClick={handleSwap}
+                    className="bg-background p-3 rounded-full border border-border/50 hover:bg-secondary/50 transition-colors"
+                  >
                     <ArrowDownUp className="h-5 w-5" />
-                  </div>
+                  </button>
                 </div>
 
                 {/* You'll Receive Section */}
@@ -63,22 +82,33 @@ const Swap = () => {
                   </div>
                   
                   <div className="flex items-center justify-between bg-secondary/30 rounded-lg p-3">
-                    <Select defaultValue="usdt">
-                      <SelectTrigger className="w-auto border-none bg-transparent p-0 h-auto focus:ring-0 [&>svg]:hidden">
-                        <div className="flex items-center gap-2">
-                          <img src="/lovable-uploads/2a45c57a-70e8-4c85-81d7-a9bf54acff10.png" alt="USDT" className="w-6 h-6 rounded-full" />
-                          <span className="font-medium">USDT</span>
-                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="usdt">USDT</SelectItem>
-                        <SelectItem value="usdc">USDC</SelectItem>
-                        <SelectItem value="avax">AVAX</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    {!isSwapped ? (
+                      <Select defaultValue="usdt">
+                        <SelectTrigger className="w-auto border-none bg-transparent p-0 h-auto focus:ring-0 [&>svg]:hidden">
+                          <div className="flex items-center gap-2">
+                            <img src="/lovable-uploads/2a45c57a-70e8-4c85-81d7-a9bf54acff10.png" alt="USDT" className="w-6 h-6 rounded-full" />
+                            <span className="font-medium">USDT</span>
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="bg-background border border-border z-50">
+                          <SelectItem value="usdt">
+                            <div className="flex items-center gap-2">
+                              <img src="/lovable-uploads/2a45c57a-70e8-4c85-81d7-a9bf54acff10.png" alt="USDT" className="w-4 h-4 rounded-full" />
+                              <span>USDT</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="usdc">USDC</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <img src="/lovable-uploads/eed6b042-1aa0-4ad2-bda2-0ba7736494c6.png" alt="AVAX" className="w-6 h-6 rounded-full" />
+                        <span className="font-medium">AVAX</span>
+                      </div>
+                    )}
                     <div className="text-xl font-medium text-right text-cyan-400">
-                      1206.73
+                      {!isSwapped ? "1206.73" : "1207"}
                     </div>
                   </div>
                 </div>

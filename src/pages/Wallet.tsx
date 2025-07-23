@@ -53,7 +53,7 @@ const Wallet = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=40&h=40&fit=crop" alt="AVAX" className="w-10 h-10 rounded-full" />
+                            <img src="/lovable-uploads/eed6b042-1aa0-4ad2-bda2-0ba7736494c6.png" alt="AVAX" className="w-10 h-10 rounded-full" />
                           </div>
                           <div>
                             <p className="font-medium">AVAX</p>
