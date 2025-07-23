@@ -39,19 +39,36 @@ const Swap = () => {
                   </div>
                   
                   <div className="flex items-center justify-between bg-secondary/30 rounded-lg p-3">
-                    <div className="flex items-center gap-2">
-                      {!isSwapped ? (
-                        <>
-                          <img src="/lovable-uploads/eed6b042-1aa0-4ad2-bda2-0ba7736494c6.png" alt="AVAX" className="w-6 h-6 rounded-full" />
-                          <span className="font-medium">AVAX</span>
-                        </>
-                      ) : (
-                        <>
-                          <img src="/lovable-uploads/2a45c57a-70e8-4c85-81d7-a9bf54acff10.png" alt="USDT" className="w-6 h-6 rounded-full" />
-                          <span className="font-medium">USDT</span>
-                        </>
-                      )}
-                    </div>
+                    {!isSwapped ? (
+                      <div className="flex items-center gap-2">
+                        <img src="/lovable-uploads/eed6b042-1aa0-4ad2-bda2-0ba7736494c6.png" alt="AVAX" className="w-6 h-6 rounded-full" />
+                        <span className="font-medium">AVAX</span>
+                      </div>
+                    ) : (
+                      <Select defaultValue="usdt">
+                        <SelectTrigger className="w-auto border-none bg-transparent p-0 h-auto focus:ring-0 [&>svg]:hidden">
+                          <div className="flex items-center gap-2">
+                            <img src="/lovable-uploads/2a45c57a-70e8-4c85-81d7-a9bf54acff10.png" alt="USDT" className="w-6 h-6 rounded-full" />
+                            <span className="font-medium">USDT</span>
+                            <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent className="bg-background border border-border z-50">
+                          <SelectItem value="usdt">
+                            <div className="flex items-center gap-2">
+                              <img src="/lovable-uploads/2a45c57a-70e8-4c85-81d7-a9bf54acff10.png" alt="USDT" className="w-4 h-4 rounded-full" />
+                              <span>USDT</span>
+                            </div>
+                          </SelectItem>
+                          <SelectItem value="usdc">
+                            <div className="flex items-center gap-2">
+                              <img src="/lovable-uploads/67018b70-553d-4f6e-9045-33cf3d7dd229.png" alt="USDC" className="w-4 h-4 rounded-full" />
+                              <span>USDC</span>
+                            </div>
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    )}
                     <input 
                       type="text" 
                       defaultValue={!isSwapped ? "1207" : "1206.73"}
@@ -98,7 +115,12 @@ const Swap = () => {
                               <span>USDT</span>
                             </div>
                           </SelectItem>
-                          <SelectItem value="usdc">USDC</SelectItem>
+                          <SelectItem value="usdc">
+                            <div className="flex items-center gap-2">
+                              <img src="/lovable-uploads/67018b70-553d-4f6e-9045-33cf3d7dd229.png" alt="USDC" className="w-4 h-4 rounded-full" />
+                              <span>USDC</span>
+                            </div>
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     ) : (
