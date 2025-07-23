@@ -18,7 +18,7 @@ const Swap = () => {
           <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 overflow-x-hidden">
             <div className="max-w-md mx-auto w-full">
               {/* Header */}
-              <div className="flex items-center justify-between mb-6 pt-5">
+              <div className="flex items-center justify-between mb-6 pt-16">
                 <h1 className="text-xl font-bold">Pay & Receive</h1>
               </div>
 

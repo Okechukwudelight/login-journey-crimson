@@ -19,19 +19,6 @@ const Wallet = () => {
           {/* Main Content */}
           <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6">
             <div className="max-w-4xl mx-auto space-y-6">
-              {/* Header */}
-              <div className="flex items-center gap-3 mb-6">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src="" />
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    C
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h1 className="text-xl font-semibold">User</h1>
-                  <p className="text-sm text-muted-foreground">@user_wallet</p>
-                </div>
-              </div>
 
               {/* Portfolio Value and Action Buttons */}
               <div className="space-y-4">
@@ -65,8 +52,8 @@ const Wallet = () => {
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-red-500 rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">A</span>
+                          <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                            <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?w=40&h=40&fit=crop" alt="AVAX" className="w-10 h-10 rounded-full" />
                           </div>
                           <div>
                             <p className="font-medium">AVAX</p>
@@ -86,8 +73,8 @@ const Wallet = () => {
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-red-600 rounded-full flex items-center justify-center">
-                            <span className="text-white font-bold text-xs">SE</span>
+                          <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                            <img src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=40&h=40&fit=crop" alt="SENA" className="w-10 h-10 rounded-full" />
                           </div>
                           <div>
                             <p className="font-medium">$ENA</p>
