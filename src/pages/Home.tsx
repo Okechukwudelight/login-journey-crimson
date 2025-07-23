@@ -8,7 +8,7 @@ import definexusLogo from "@/assets/definexus-logo.png";
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-red-300 via-red-200 to-red-100 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-[#7D0101] via-red-200 to-red-100 overflow-hidden" style={{ backgroundColor: '#7D0101' }}>
       <SidebarProvider>
         <div className="flex w-full">
           {/* Desktop Sidebar - hidden on mobile */}
@@ -36,29 +36,29 @@ const Home = () => {
               <div className="flex flex-col items-center mb-8 md:mb-12">
                 <div className="relative w-80 h-80 md:w-96 md:h-96 flex items-center justify-center">
                   {/* Outer Circle */}
-                  <div className="absolute inset-0 rounded-full border-8 border-red-200"></div>
+                  <div className="absolute inset-0 rounded-full border-8" style={{ borderColor: '#7D0101' }}></div>
                   
                   {/* Middle Circle */}
-                  <div className="absolute inset-4 rounded-full border-8 border-red-100"></div>
+                  <div className="absolute inset-4 rounded-full border-8" style={{ borderColor: '#9D2525' }}></div>
                   
                   {/* Inner Circle */}
                   <div className="absolute inset-8 rounded-full bg-white/80 flex flex-col items-center justify-center p-8">
                     <div className="text-center mb-4">
                       <p className="text-gray-600 text-lg font-medium mb-2">Balance</p>
                       <p className="text-4xl md:text-5xl font-bold text-gray-800">0</p>
-                      <p className="text-red-500 text-lg font-medium mt-2 flex items-center justify-center gap-1">
-                        🐝 0.00 DNX/hr
+                      <p className="text-lg font-medium mt-2 flex items-center justify-center gap-1" style={{ color: '#7D0101' }}>
+                        0.00 DNX/hr
                       </p>
                       <div className="flex items-center justify-center gap-2 mt-2 text-gray-600">
                         <Users className="w-4 h-4" />
-                        <span>1/5</span>
+                        <span>0/5</span>
                       </div>
                     </div>
                   </div>
                   
                   {/* Definexus Logo at bottom */}
-                  <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 translate-y-1/2 bg-red-500 rounded-full w-16 h-16 flex items-center justify-center cursor-pointer hover:bg-red-600 transition-colors">
-                    <img src={definexusLogo} alt="Definexus" className="w-8 h-8" />
+                  <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 translate-y-1/2 rounded-full w-16 h-16 flex items-center justify-center cursor-pointer transition-opacity hover:opacity-80" style={{ backgroundColor: '#7D0101' }}>
+                    <img src={definexusLogo} alt="Definexus" className="w-10 h-10" />
                   </div>
                 </div>
               </div>
@@ -85,7 +85,7 @@ const Home = () => {
               <div className="bg-white/30 backdrop-blur-sm rounded-2xl p-6 md:p-8 mx-4 md:mx-0">
                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                   <div className="flex items-center gap-4">
-                    <div className="bg-red-400 rounded-full p-3">
+                    <div className="rounded-full p-3" style={{ backgroundColor: '#7D0101' }}>
                       <Plus className="w-6 h-6 text-white" />
                     </div>
                     <div className="text-center md:text-left">
@@ -95,7 +95,7 @@ const Home = () => {
                       <p className="text-gray-700">rate, uncapped!</p>
                     </div>
                   </div>
-                  <Button className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-xl font-medium">
+                  <Button className="text-white px-6 py-3 rounded-xl font-medium transition-opacity hover:opacity-90" style={{ backgroundColor: '#7D0101' }}>
                     Invite Now →
                   </Button>
                 </div>
