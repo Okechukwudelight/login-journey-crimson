@@ -3,9 +3,9 @@ import { NavLink } from "react-router-dom";
 
 const items = [
   { title: "Home", url: "/home", icon: Home },
-  { title: "Wallet", url: "/wallet", icon: Wallet },
   { title: "Staking", url: "/staking", icon: Coins },
   { title: "Swap", url: "/swap", icon: ArrowUpDown },
+  { title: "Wallet", url: "/wallet", icon: Wallet },
   { title: "Profile", url: "/profile", icon: User },
 ];
 

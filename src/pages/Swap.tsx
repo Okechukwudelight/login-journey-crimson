@@ -2,6 +2,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { BottomNav } from "@/components/bottom-nav";
 import { ChevronDown, ArrowDownUp, Info } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Swap = () => {
   return (
@@ -14,10 +15,10 @@ const Swap = () => {
           </div>
 
           {/* Main Content */}
-          <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6">
-            <div className="max-w-md mx-auto">
+          <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 overflow-x-hidden">
+            <div className="max-w-md mx-auto w-full">
               {/* Header */}
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center justify-between mb-6 pt-4">
                 <h1 className="text-xl font-bold">Pay & Receive</h1>
               </div>
 
@@ -62,15 +63,23 @@ const Swap = () => {
                   </div>
                   
                   <div className="flex items-center justify-between bg-secondary/30 rounded-lg p-3">
-                    <div className="flex items-center gap-2">
-                      <div className="w-6 h-6 bg-teal-500 rounded-full flex items-center justify-center text-white text-xs">T</div>
-                      <span className="font-medium">USDT</span>
+                    <Select defaultValue="usdt">
+                      <SelectTrigger className="w-auto border-none bg-transparent p-0 h-auto focus:ring-0">
+                        <div className="flex items-center gap-2">
+                          <div className="w-6 h-6 bg-teal-500 rounded-full flex items-center justify-center text-white text-xs">T</div>
+                          <span className="font-medium">USDT</span>
+                          <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="usdt">USDT</SelectItem>
+                        <SelectItem value="usdc">USDC</SelectItem>
+                        <SelectItem value="avax">AVAX</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <div className="text-xl font-medium text-right text-cyan-400">
+                      1206.73
                     </div>
-                    <input 
-                      type="text" 
-                      defaultValue="1206.73" 
-                      className="text-xl font-medium text-right text-cyan-400 bg-transparent border-none outline-none focus:ring-0" 
-                    />
                   </div>
                 </div>
 
