@@ -64,7 +64,7 @@ const Swap = () => {
                   
                   <div className="flex items-center justify-between bg-secondary/30 rounded-lg p-3">
                     <Select defaultValue="usdt">
-                      <SelectTrigger className="w-auto border-none bg-transparent p-0 h-auto focus:ring-0">
+                      <SelectTrigger className="w-auto border-none bg-transparent p-0 h-auto focus:ring-0 [&>svg]:hidden">
                         <div className="flex items-center gap-2">
                           <div className="w-6 h-6 bg-teal-500 rounded-full flex items-center justify-center text-white text-xs">T</div>
                           <span className="font-medium">USDT</span>

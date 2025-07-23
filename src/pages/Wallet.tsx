@@ -28,8 +28,8 @@ const Wallet = () => {
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <h1 className="text-xl font-semibold">Caelus</h1>
-                  <p className="text-sm text-muted-foreground">@Caelus_avax</p>
+                  <h1 className="text-xl font-semibold">User</h1>
+                  <p className="text-sm text-muted-foreground">@user_wallet</p>
                 </div>
               </div>
 
