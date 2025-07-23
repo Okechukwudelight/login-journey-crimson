@@ -4,11 +4,11 @@ import { BottomNav } from "@/components/bottom-nav";
 import { Bell, Users, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import definexusLogo from "@/assets/definexus-logo.png";
+const definexusLogo = "/lovable-uploads/bf68da2b-8484-42fd-bf25-c6cfa88cbe26.png";
 
 const Home = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#7D0101] via-red-200 to-red-100 overflow-hidden" style={{ backgroundColor: '#7D0101' }}>
+    <div className="min-h-screen bg-black overflow-hidden">
       <SidebarProvider>
         <div className="flex w-full">
           {/* Desktop Sidebar - hidden on mobile */}
@@ -73,12 +73,7 @@ const Home = () => {
                     <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                   </div>
                   <span className="text-xl font-mono">00:00:00</span>
-                </div>
-                
-                {/* Progress Bar */}
-                <div className="mt-4 max-w-xs mx-auto">
-                  <Progress value={20} className="h-2" />
-                </div>
+              </div>
               </div>
 
               {/* Invite Section */}
