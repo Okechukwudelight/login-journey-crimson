@@ -66,7 +66,7 @@ const Swap = () => {
                     <Select defaultValue="usdt">
                       <SelectTrigger className="w-auto border-none bg-transparent p-0 h-auto focus:ring-0 [&>svg]:hidden">
                         <div className="flex items-center gap-2">
-                          <div className="w-6 h-6 bg-teal-500 rounded-full flex items-center justify-center text-white text-xs">T</div>
+                          <img src="/lovable-uploads/2a45c57a-70e8-4c85-81d7-a9bf54acff10.png" alt="USDT" className="w-6 h-6 rounded-full" />
                           <span className="font-medium">USDT</span>
                           <ChevronDown className="h-4 w-4 text-muted-foreground" />
                         </div>
