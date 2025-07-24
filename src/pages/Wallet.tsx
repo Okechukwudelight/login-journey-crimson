@@ -5,8 +5,22 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { WalletConnect } from "@/components/wallet-connect";
+import { useEffect, useState } from "react";
 
 const Wallet = () => {
+  const [hasWallet, setHasWallet] = useState(false);
+
+  useEffect(() => {
+    // Check if user has connected wallet
+    const walletConnection = localStorage.getItem('walletConnection');
+    setHasWallet(!!walletConnection);
+  }, []);
+
+  if (!hasWallet) {
+    return <WalletConnect />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <SidebarProvider>

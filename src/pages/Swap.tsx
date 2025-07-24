@@ -3,10 +3,28 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { BottomNav } from "@/components/bottom-nav";
 import { ChevronDown, ArrowDownUp, Info } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Swap = () => {
   const [isSwapped, setIsSwapped] = useState(false);
+  const [hasWallet, setHasWallet] = useState(false);
+
+  useEffect(() => {
+    // Check if user has connected wallet
+    const walletConnection = localStorage.getItem('walletConnection');
+    setHasWallet(!!walletConnection);
+  }, []);
+
+  if (!hasWallet) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-foreground mb-4">No Wallet Connected</h1>
+          <p className="text-muted-foreground">Please connect your wallet to access swap features.</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleSwap = () => {
     setIsSwapped(!isSwapped);

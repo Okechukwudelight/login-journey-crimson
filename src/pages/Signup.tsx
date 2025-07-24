@@ -71,6 +71,26 @@ const Signup = () => {
       return;
     }
 
+    // Check if user already exists with Google OAuth
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password: 'dummy-password' // This will fail but help us check if user exists
+      });
+      
+      // If we get a specific error about invalid credentials but user exists
+      if (error && error.message.includes('Invalid login credentials')) {
+        toast({
+          title: "Error",
+          description: "An account with this email already exists. Please sign in instead.",
+          variant: "destructive",
+        });
+        return;
+      }
+    } catch (err) {
+      // Continue with verification code sending
+    }
+
     const verificationCode = generateVerificationCode();
     setGeneratedCode(verificationCode);
 

@@ -4,9 +4,25 @@ import { BottomNav } from "@/components/bottom-nav";
 import { Bell, Users, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
+import { useAuth } from "@/hooks/useAuth";
 const definexusLogo = "/lovable-uploads/bf68da2b-8484-42fd-bf25-c6cfa88cbe26.png";
 
 const Home = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    window.location.href = '/signin';
+    return null;
+  }
+
   return (
     <div className="min-h-screen bg-black overflow-hidden">
       <SidebarProvider>
@@ -22,7 +38,7 @@ const Home = () => {
             <div className="md:hidden flex justify-end items-center mb-6">
               <div className="relative">
                 <div className="bg-white/20 rounded-full p-2">
-                  <Bell className="h-6 w-6 text-gray-700" />
+                  <Bell className="h-6 w-6 text-white" />
                 </div>
                 <div className="absolute -top-1 -right-1 bg-red-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-medium">
                   3
@@ -57,7 +73,7 @@ const Home = () => {
                   </div>
                   
                   {/* Definexus Logo at bottom */}
-                  <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 translate-y-1/2 rounded-full w-16 h-16 flex items-center justify-center cursor-pointer transition-opacity hover:opacity-80" style={{ backgroundColor: '#7D0101' }}>
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 translate-y-1/2 rounded-full w-16 h-16 flex items-center justify-center cursor-pointer transition-opacity hover:opacity-80" style={{ backgroundColor: '#7D0101' }}>
                     <img src={definexusLogo} alt="Definexus" className="w-10 h-10" />
                   </div>
                 </div>
@@ -65,8 +81,8 @@ const Home = () => {
 
               {/* Game Status */}
               <div className="text-center mb-6">
-              <p className="text-gray-700 text-lg font-medium mb-4">
-                Earn a $DNX in game, future's not the same!
+              <p className="text-primary text-lg font-medium mb-4">
+                Earn $DNX in game, future's not the same!
               </p>
                 <div className="flex items-center justify-center gap-2 text-gray-600">
                   <div className="w-6 h-6 rounded-full border-2 border-gray-400 flex items-center justify-center">

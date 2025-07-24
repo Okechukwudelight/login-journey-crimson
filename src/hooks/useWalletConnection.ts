@@ -12,6 +12,14 @@ export const useWalletConnection = () => {
   const [connecting, setConnecting] = useState(false);
   const { toast } = useToast();
 
+  // Load wallet from localStorage on mount
+  useState(() => {
+    const savedWallet = localStorage.getItem('walletConnection');
+    if (savedWallet) {
+      setWallet(JSON.parse(savedWallet));
+    }
+  });
+
   const connectMetaMask = useCallback(async () => {
     if (!window.ethereum) {
       toast({
@@ -29,7 +37,9 @@ export const useWalletConnection = () => {
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
 
-      setWallet({ address, provider: 'MetaMask' });
+      const walletInfo = { address, provider: 'MetaMask' };
+      setWallet(walletInfo);
+      localStorage.setItem('walletConnection', JSON.stringify(walletInfo));
       toast({
         title: "Connected",
         description: `Connected to MetaMask: ${address.slice(0, 6)}...${address.slice(-4)}`,
@@ -65,7 +75,9 @@ export const useWalletConnection = () => {
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
 
-      setWallet({ address, provider: 'Core Wallet' });
+      const walletInfo = { address, provider: 'Core Wallet' };
+      setWallet(walletInfo);
+      localStorage.setItem('walletConnection', JSON.stringify(walletInfo));
       toast({
         title: "Connected",
         description: `Connected to Core Wallet: ${address.slice(0, 6)}...${address.slice(-4)}`,

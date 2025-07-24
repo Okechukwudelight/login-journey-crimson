@@ -1,4 +1,4 @@
-import { Home, Bell, Wallet, User, Search, MessageCircle, MoreHorizontal, Coins, ArrowUpDown } from "lucide-react";
+import { Home, Bell, Wallet, User, Search, MessageCircle, MoreHorizontal, Coins, ArrowUpDown, LogOut } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 
 import {
@@ -13,6 +13,8 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
 
 const items = [
   { title: "Home", url: "/home", icon: Home },
@@ -25,6 +27,7 @@ const items = [
 
 export function AppSidebar() {
   const location = useLocation();
+  const { user, signOut } = useAuth();
   const currentPath = location.pathname;
 
   return (
@@ -70,27 +73,28 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4">
-        <NavLink 
-          to="/profile"
-          className={({ isActive }) => 
-            `flex items-center gap-3 p-3 rounded-full transition-all duration-200 ${
-              isActive 
-                ? "bg-primary/10 text-primary" 
-                : "hover:bg-muted/50"
-            }`
-          }
-        >
-          <Avatar className="h-10 w-10">
-            <AvatarImage src="" />
-            <AvatarFallback className="bg-primary text-primary-foreground">
-              U
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col">
-            <span className="font-semibold text-sm">Profile</span>
-            <span className="text-xs text-muted-foreground">@username</span>
+        <div className="flex items-center justify-between p-3 rounded-full transition-all duration-200 hover:bg-muted/50">
+          <div className="flex items-center gap-3">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={user?.user_metadata?.avatar_url} />
+              <AvatarFallback className="bg-primary text-primary-foreground">
+                {user?.email?.charAt(0).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col">
+              <span className="font-semibold text-sm">{user?.user_metadata?.full_name || 'User'}</span>
+              <span className="text-xs text-muted-foreground">{user?.email}</span>
+            </div>
           </div>
-        </NavLink>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={signOut}
+            className="text-muted-foreground hover:text-foreground"
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
       </SidebarFooter>
     </Sidebar>
   );
