@@ -1,11 +1,135 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useState, useEffect } from "react";
+import emailjs from "@emailjs/browser";
+import { useToast } from "@/hooks/use-toast";
 import googleLogo from "@/assets/google-logo.png";
 import metamaskLogo from "@/assets/metamask-logo.svg";
 import coreWalletLogo from "/lovable-uploads/e86c25ac-3589-408e-a716-131ab21a5d5c.png";
 
 const Signup = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [code, setCode] = useState("");
+  const [generatedCode, setGeneratedCode] = useState("");
+  const [countdown, setCountdown] = useState(0);
+  const { toast } = useToast();
+
+  // Initialize EmailJS
+  useEffect(() => {
+    emailjs.init("xbyQZEcbAdxv2VNRC");
+  }, []);
+
+  // Load countdown from localStorage on component mount
+  useEffect(() => {
+    const savedCountdown = localStorage.getItem("emailCountdown");
+    const savedTimestamp = localStorage.getItem("emailTimestamp");
+    
+    if (savedCountdown && savedTimestamp) {
+      const timeElapsed = Math.floor((Date.now() - parseInt(savedTimestamp)) / 1000);
+      const remainingTime = parseInt(savedCountdown) - timeElapsed;
+      
+      if (remainingTime > 0) {
+        setCountdown(remainingTime);
+      } else {
+        localStorage.removeItem("emailCountdown");
+        localStorage.removeItem("emailTimestamp");
+      }
+    }
+  }, []);
+
+  // Countdown timer effect
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1);
+        if (countdown - 1 === 0) {
+          localStorage.removeItem("emailCountdown");
+          localStorage.removeItem("emailTimestamp");
+        }
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [countdown]);
+
+  const generateVerificationCode = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
+
+  const sendVerificationCode = async () => {
+    if (!email) {
+      toast({
+        title: "Error",
+        description: "Please enter your email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const verificationCode = generateVerificationCode();
+    setGeneratedCode(verificationCode);
+
+    try {
+      await emailjs.send(
+        "service_ce4zn15",
+        "template_6g9zd7b",
+        {
+          email: email,
+          verification_code: verificationCode,
+        }
+      );
+
+      toast({
+        title: "Code Sent",
+        description: "Verification code sent to your email",
+      });
+
+      // Start countdown
+      setCountdown(10);
+      localStorage.setItem("emailCountdown", "10");
+      localStorage.setItem("emailTimestamp", Date.now().toString());
+    } catch (error) {
+      console.error("EmailJS error:", error);
+      toast({
+        title: "Error",
+        description: "Failed to send verification code. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !password || !code) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (code !== generatedCode) {
+      toast({
+        title: "Error",
+        description: "Invalid verification code",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Handle successful registration
+    toast({
+      title: "Success",
+      description: "Account created successfully! Please sign in.",
+    });
+    
+    // Redirect to signin page
+    window.location.href = "/signin";
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-6">
@@ -14,7 +138,7 @@ const Signup = () => {
           <p className="text-muted-foreground mt-2">Create your account to get started</p>
         </div>
 
-        <form className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email Input with Send Code */}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -24,12 +148,16 @@ const Signup = () => {
                 type="email"
                 placeholder="Enter your email"
                 className="pr-20"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
               <button
                 type="button"
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-[#7D0101] hover:text-[#7D0101]/80 transition-colors"
+                onClick={sendVerificationCode}
+                disabled={countdown > 0}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-sm text-[#7D0101] hover:text-[#7D0101]/80 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Send Code
+                {countdown > 0 ? `${countdown}s` : "Send Code"}
               </button>
             </div>
           </div>
@@ -41,6 +169,8 @@ const Signup = () => {
               id="password"
               type="password"
               placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
@@ -51,6 +181,8 @@ const Signup = () => {
               id="code"
               type="text"
               placeholder="Enter verification code"
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
             />
           </div>
 
