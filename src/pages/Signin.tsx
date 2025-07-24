@@ -1,11 +1,80 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import googleLogo from "@/assets/google-logo.png";
 import metamaskLogo from "@/assets/metamask-logo.svg";
 import coreWalletLogo from "/lovable-uploads/e86c25ac-3589-408e-a716-131ab21a5d5c.png";
 
 const Signin = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email || !password) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Welcome back!",
+        });
+        window.location.href = "/home";
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/home`
+      }
+    });
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-6">
@@ -14,7 +83,7 @@ const Signin = () => {
           <p className="text-muted-foreground mt-2">Welcome back to your account</p>
         </div>
 
-        <form className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email Input */}
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -22,6 +91,8 @@ const Signin = () => {
               id="email"
               type="email"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
@@ -32,12 +103,14 @@ const Signin = () => {
               id="password"
               type="password"
               placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
           {/* Sign In Button */}
-          <Button type="submit" className="w-full">
-            Sign In
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? "Signing In..." : "Sign In"}
           </Button>
         </form>
 
@@ -49,13 +122,22 @@ const Signin = () => {
           
           {/* Social Login Options */}
           <div className="flex justify-center items-center gap-6">
-            <button className="flex items-center justify-center w-12 h-12 rounded-lg border border-border hover:bg-accent transition-colors">
+            <button 
+              onClick={handleGoogleSignIn}
+              className="flex items-center justify-center w-12 h-12 rounded-lg border border-border hover:bg-accent transition-colors"
+            >
               <img src={googleLogo} alt="Google" className="w-6 h-6 rounded-full" />
             </button>
-            <button className="flex items-center justify-center w-12 h-12 rounded-lg border border-border hover:bg-accent transition-colors">
+            <button 
+              onClick={() => toast({ title: "Coming Soon", description: "MetaMask integration will be available soon" })}
+              className="flex items-center justify-center w-12 h-12 rounded-lg border border-border hover:bg-accent transition-colors"
+            >
               <img src={metamaskLogo} alt="MetaMask" className="w-6 h-6 rounded-full" />
             </button>
-            <button className="flex items-center justify-center w-12 h-12 rounded-lg border border-border hover:bg-accent transition-colors">
+            <button 
+              onClick={() => toast({ title: "Coming Soon", description: "Core Wallet integration will be available soon" })}
+              className="flex items-center justify-center w-12 h-12 rounded-lg border border-border hover:bg-accent transition-colors"
+            >
               <img src={coreWalletLogo} alt="Core Wallet" className="w-6 h-6 rounded-full" />
             </button>
           </div>
