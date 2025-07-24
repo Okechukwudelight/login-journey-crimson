@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useWalletConnection } from "@/hooks/useWalletConnection";
 import googleLogo from "@/assets/google-logo.png";
 import metamaskLogo from "@/assets/metamask-logo.svg";
 import coreWalletLogo from "/lovable-uploads/e86c25ac-3589-408e-a716-131ab21a5d5c.png";
@@ -13,6 +14,7 @@ const Signin = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { connectMetaMask, connectCoreWallet, connecting } = useWalletConnection();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +77,20 @@ const Signin = () => {
     }
   };
 
+  const handleMetaMaskConnect = async () => {
+    const success = await connectMetaMask();
+    if (success) {
+      window.location.href = "/home";
+    }
+  };
+
+  const handleCoreWalletConnect = async () => {
+    const success = await connectCoreWallet();
+    if (success) {
+      window.location.href = "/home";
+    }
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-6">
@@ -129,14 +145,16 @@ const Signin = () => {
               <img src={googleLogo} alt="Google" className="w-6 h-6 rounded-full" />
             </button>
             <button 
-              onClick={() => toast({ title: "Coming Soon", description: "MetaMask integration will be available soon" })}
-              className="flex items-center justify-center w-12 h-12 rounded-lg border border-border hover:bg-accent transition-colors"
+              onClick={handleMetaMaskConnect}
+              disabled={connecting}
+              className="flex items-center justify-center w-12 h-12 rounded-lg border border-border hover:bg-accent transition-colors disabled:opacity-50"
             >
               <img src={metamaskLogo} alt="MetaMask" className="w-6 h-6 rounded-full" />
             </button>
             <button 
-              onClick={() => toast({ title: "Coming Soon", description: "Core Wallet integration will be available soon" })}
-              className="flex items-center justify-center w-12 h-12 rounded-lg border border-border hover:bg-accent transition-colors"
+              onClick={handleCoreWalletConnect}
+              disabled={connecting}
+              className="flex items-center justify-center w-12 h-12 rounded-lg border border-border hover:bg-accent transition-colors disabled:opacity-50"
             >
               <img src={coreWalletLogo} alt="Core Wallet" className="w-6 h-6 rounded-full" />
             </button>
