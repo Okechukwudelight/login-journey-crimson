@@ -11,7 +11,7 @@ const Home = () => {
   const { user, loading } = useAuth();
   const [timeLeft, setTimeLeft] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const [dnxRate, setDnxRate] = useState(0.00);
+  const [dnxRate, setDnxRate] = useState(0.00000);
 
   // Timer effect - MUST be before any conditional returns
   useEffect(() => {
@@ -21,13 +21,13 @@ const Home = () => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
             setIsRunning(false);
-            setDnxRate(0.00);
+            setDnxRate(0.00000);
             return 0;
           }
           return prev - 1;
         });
-        // Increase DNX rate every second
-        setDnxRate((prev) => prev + 0.0001);
+        // Increase DNX rate every second - 0.02 DNX per hour = 0.02/3600 per second
+        setDnxRate((prev) => prev + (0.02 / 3600));
       }, 1000);
     }
     return () => clearInterval(interval);
@@ -54,9 +54,9 @@ const Home = () => {
   };
 
   const handleStartTimer = () => {
-    setTimeLeft(60); // 1 minute
+    setTimeLeft(86400); // 24 hours = 86400 seconds
     setIsRunning(true);
-    setDnxRate(0.0001);
+    setDnxRate(0.00000);
   };
 
   return (
@@ -70,9 +70,8 @@ const Home = () => {
 
           {/* Main Content */}
           <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6">
-            {/* Mobile Header with Notification and User Menu */}
-            <div className="md:hidden flex justify-between items-center mb-6">
-              <MobileUserMenu />
+            {/* Mobile Header with Notification only */}
+            <div className="md:hidden flex justify-end items-center mb-6">
               <div className="relative">
                 <div className="bg-white/20 rounded-full p-2">
                   <Bell className="h-6 w-6 text-white" />
@@ -100,7 +99,7 @@ const Home = () => {
                       <p className="text-gray-600 text-lg font-medium mb-2">Balance</p>
                       <p className="text-4xl md:text-5xl font-bold text-gray-800">0</p>
                       <p className="text-lg font-medium mt-2 flex items-center justify-center gap-1" style={{ color: '#7D0101' }}>
-                        {dnxRate.toFixed(4)} DNX/hr
+                        {dnxRate.toFixed(5)} DNX/hr
                       </p>
                       <div className="flex items-center justify-center gap-2 mt-2 text-gray-600">
                         <Users className="w-4 h-4" />
