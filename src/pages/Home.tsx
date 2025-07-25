@@ -15,20 +15,7 @@ const Home = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [dnxRate, setDnxRate] = useState(0.00);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-black flex items-center justify-center">
-        <div className="text-white">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    window.location.href = '/signin';
-    return null;
-  }
-
-  // Timer effect
+  // Timer effect - MUST be before any conditional returns
   useEffect(() => {
     let interval: NodeJS.Timeout;
     if (isRunning && timeLeft > 0) {
@@ -47,6 +34,19 @@ const Home = () => {
     }
     return () => clearInterval(interval);
   }, [isRunning, timeLeft]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    window.location.href = '/signin';
+    return null;
+  }
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
