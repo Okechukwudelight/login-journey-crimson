@@ -71,26 +71,6 @@ const Signup = () => {
       return;
     }
 
-    // Check if user already exists with Google OAuth
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password: 'dummy-password' // This will fail but help us check if user exists
-      });
-      
-      // If we get a specific error about invalid credentials but user exists
-      if (error && error.message.includes('Invalid login credentials')) {
-        toast({
-          title: "Error",
-          description: "An account with this email already exists. Please sign in instead.",
-          variant: "destructive",
-        });
-        return;
-      }
-    } catch (err) {
-      // Continue with verification code sending
-    }
-
     const verificationCode = generateVerificationCode();
     setGeneratedCode(verificationCode);
 
@@ -147,7 +127,7 @@ const Signup = () => {
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -162,11 +142,21 @@ const Signup = () => {
           variant: "destructive",
         });
       } else {
-        toast({
-          title: "Success",
-          description: "Account created successfully! Please check your email to confirm.",
-        });
-        window.location.href = "/signin";
+        // Check if user was immediately confirmed (auto-confirm enabled)
+        if (data.user && !data.user.email_confirmed_at) {
+          toast({
+            title: "Success",
+            description: "Account created successfully! Please check your email to confirm.",
+          });
+        } else {
+          toast({
+            title: "Success",
+            description: "Account created successfully! Redirecting to home...",
+          });
+          setTimeout(() => {
+            window.location.href = "/home";
+          }, 1000);
+        }
       }
     } catch (error) {
       toast({
