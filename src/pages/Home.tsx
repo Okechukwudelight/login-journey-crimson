@@ -5,6 +5,7 @@ import { MobileUserMenu } from "@/components/mobile-user-menu";
 import { Bell, Users } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 const definexusLogo = "/lovable-uploads/bf68da2b-8484-42fd-bf25-c6cfa88cbe26.png";
 
 const Home = () => {
@@ -12,6 +13,14 @@ const Home = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [dnxRate, setDnxRate] = useState(0.00000);
+  const [totalDnxEarned, setTotalDnxEarned] = useState(0);
+
+  // Check for existing mining session on component mount
+  useEffect(() => {
+    if (user) {
+      checkExistingMiningSession();
+    }
+  }, [user]);
 
   // Timer effect - MUST be before any conditional returns
   useEffect(() => {
@@ -20,8 +29,7 @@ const Home = () => {
       interval = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            setIsRunning(false);
-            setDnxRate(0.00000);
+            completeMiningSession();
             return 0;
           }
           return prev - 1;
@@ -32,6 +40,77 @@ const Home = () => {
     }
     return () => clearInterval(interval);
   }, [isRunning, timeLeft]);
+
+  const checkExistingMiningSession = async () => {
+    if (!user) return;
+
+    const { data: activeSessions, error } = await supabase
+      .from('mining_sessions')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    if (error) {
+      console.error('Error checking mining session:', error);
+      return;
+    }
+
+    if (activeSessions && activeSessions.length > 0) {
+      const session = activeSessions[0];
+      const startTime = new Date(session.start_time);
+      const endTime = new Date(session.end_time);
+      const now = new Date();
+
+      if (now < endTime) {
+        // Session is still active
+        const remainingSeconds = Math.floor((endTime.getTime() - now.getTime()) / 1000);
+        const elapsedSeconds = Math.floor((now.getTime() - startTime.getTime()) / 1000);
+        const currentRate = (elapsedSeconds / 3600) * 0.02; // 0.02 DNX per hour
+
+        setTimeLeft(remainingSeconds);
+        setIsRunning(true);
+        setDnxRate(currentRate);
+        setTotalDnxEarned(session.dnx_earned);
+      } else {
+        // Session has expired, mark as completed
+        await completeMiningSession(session.id);
+      }
+    }
+  };
+
+  const completeMiningSession = async (sessionId?: string) => {
+    if (!user) return;
+
+    const finalDnxEarned = 0.48; // 24 hours * 0.02 DNX/hour
+
+    if (sessionId) {
+      // Update existing session
+      await supabase
+        .from('mining_sessions')
+        .update({
+          is_active: false,
+          dnx_earned: finalDnxEarned
+        })
+        .eq('id', sessionId);
+    } else {
+      // Update current active session
+      await supabase
+        .from('mining_sessions')
+        .update({
+          is_active: false,
+          dnx_earned: finalDnxEarned
+        })
+        .eq('user_id', user.id)
+        .eq('is_active', true);
+    }
+
+    setIsRunning(false);
+    setDnxRate(0.00000);
+    setTimeLeft(0);
+    setTotalDnxEarned(prev => prev + finalDnxEarned);
+  };
 
   if (loading) {
     return (
@@ -53,7 +132,27 @@ const Home = () => {
     return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleStartTimer = () => {
+  const handleStartTimer = async () => {
+    if (!user || isRunning) return;
+
+    const startTime = new Date();
+    const endTime = new Date(startTime.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
+
+    const { error } = await supabase
+      .from('mining_sessions')
+      .insert({
+        user_id: user.id,
+        start_time: startTime.toISOString(),
+        end_time: endTime.toISOString(),
+        dnx_earned: 0,
+        is_active: true
+      });
+
+    if (error) {
+      console.error('Error starting mining session:', error);
+      return;
+    }
+
     setTimeLeft(86400); // 24 hours = 86400 seconds
     setIsRunning(true);
     setDnxRate(0.00000);
