@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { BottomNav } from "@/components/bottom-nav";
 
 const Staking = () => {
   const [hasWallet, setHasWallet] = useState(false);
@@ -21,11 +22,14 @@ const Staking = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4">
+    <div className="min-h-screen bg-background p-4 pb-20">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-foreground mb-8">Staking</h1>
         {/* Add your staking interface here */}
       </div>
+      
+      {/* Bottom Navigation */}
+      <BottomNav />
     </div>
   );
 };
