@@ -6,6 +6,7 @@ import emailjs from "@emailjs/browser";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useWalletConnection } from "@/hooks/useWalletConnection";
+import { useAuth } from "@/hooks/useAuth";
 import googleLogo from "@/assets/google-logo.png";
 import metamaskLogo from "@/assets/metamask-logo.svg";
 import coreWalletLogo from "/lovable-uploads/e86c25ac-3589-408e-a716-131ab21a5d5c.png";
@@ -19,6 +20,14 @@ const Signup = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const { connectMetaMask, connectCoreWallet, connecting } = useWalletConnection();
+  const { user } = useAuth();
+
+  // Redirect authenticated users
+  useEffect(() => {
+    if (user) {
+      window.location.href = "/home";
+    }
+  }, [user]);
 
   // Initialize EmailJS
   useEffect(() => {

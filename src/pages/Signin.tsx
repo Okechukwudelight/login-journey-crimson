@@ -1,10 +1,11 @@
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useWalletConnection } from "@/hooks/useWalletConnection";
+import { useAuth } from "@/hooks/useAuth";
 import googleLogo from "@/assets/google-logo.png";
 import metamaskLogo from "@/assets/metamask-logo.svg";
 import coreWalletLogo from "/lovable-uploads/e86c25ac-3589-408e-a716-131ab21a5d5c.png";
@@ -15,6 +16,14 @@ const Signin = () => {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const { connectMetaMask, connectCoreWallet, connecting } = useWalletConnection();
+  const { user } = useAuth();
+
+  // Redirect authenticated users
+  useEffect(() => {
+    if (user) {
+      window.location.href = "/home";
+    }
+  }, [user]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

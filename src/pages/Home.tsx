@@ -1,14 +1,19 @@
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { BottomNav } from "@/components/bottom-nav";
+import { MobileUserMenu } from "@/components/mobile-user-menu";
 import { Bell, Users, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { useAuth } from "@/hooks/useAuth";
+import { useState, useEffect } from "react";
 const definexusLogo = "/lovable-uploads/bf68da2b-8484-42fd-bf25-c6cfa88cbe26.png";
 
 const Home = () => {
   const { user, loading } = useAuth();
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  const [dnxRate, setDnxRate] = useState(0.00);
 
   if (loading) {
     return (
@@ -23,6 +28,38 @@ const Home = () => {
     return null;
   }
 
+  // Timer effect
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isRunning && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            setIsRunning(false);
+            setDnxRate(0.00);
+            return 0;
+          }
+          return prev - 1;
+        });
+        // Increase DNX rate every second
+        setDnxRate((prev) => prev + 0.0001);
+      }, 1000);
+    }
+    return () => clearInterval(interval);
+  }, [isRunning, timeLeft]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}:00`;
+  };
+
+  const handleStartTimer = () => {
+    setTimeLeft(60); // 1 minute
+    setIsRunning(true);
+    setDnxRate(0.0001);
+  };
+
   return (
     <div className="min-h-screen bg-black overflow-hidden">
       <SidebarProvider>
@@ -34,8 +71,9 @@ const Home = () => {
 
           {/* Main Content */}
           <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6">
-            {/* Mobile Header with Notification */}
-            <div className="md:hidden flex justify-end items-center mb-6">
+            {/* Mobile Header with Notification and User Menu */}
+            <div className="md:hidden flex justify-between items-center mb-6">
+              <MobileUserMenu />
               <div className="relative">
                 <div className="bg-white/20 rounded-full p-2">
                   <Bell className="h-6 w-6 text-white" />
@@ -63,7 +101,7 @@ const Home = () => {
                       <p className="text-gray-600 text-lg font-medium mb-2">Balance</p>
                       <p className="text-4xl md:text-5xl font-bold text-gray-800">0</p>
                       <p className="text-lg font-medium mt-2 flex items-center justify-center gap-1" style={{ color: '#7D0101' }}>
-                        0.00 DNX/hr
+                        {dnxRate.toFixed(4)} DNX/hr
                       </p>
                       <div className="flex items-center justify-center gap-2 mt-2 text-gray-600">
                         <Users className="w-4 h-4" />
@@ -72,10 +110,15 @@ const Home = () => {
                     </div>
                   </div>
                   
-                  {/* Definexus Logo at bottom */}
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 translate-y-1/2 rounded-full w-16 h-16 flex items-center justify-center cursor-pointer transition-opacity hover:opacity-80" style={{ backgroundColor: '#7D0101' }}>
+                  {/* Definexus Logo at bottom - clickable to start timer */}
+                  <button 
+                    onClick={handleStartTimer}
+                    disabled={isRunning}
+                    className="absolute bottom-4 left-1/2 transform -translate-x-1/2 translate-y-1/2 rounded-full w-16 h-16 flex items-center justify-center cursor-pointer transition-opacity hover:opacity-80 disabled:opacity-50" 
+                    style={{ backgroundColor: '#7D0101' }}
+                  >
                     <img src={definexusLogo} alt="Definexus" className="w-10 h-10" />
-                  </div>
+                  </button>
                 </div>
               </div>
 
@@ -88,7 +131,7 @@ const Home = () => {
                   <div className="w-6 h-6 rounded-full border-2 border-gray-400 flex items-center justify-center">
                     <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                   </div>
-                  <span className="text-xl font-mono">00:00:00</span>
+                  <span className="text-xl font-mono">{formatTime(timeLeft)}</span>
               </div>
               </div>
 
