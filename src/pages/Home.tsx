@@ -2,9 +2,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { BottomNav } from "@/components/bottom-nav";
 import { MobileUserMenu } from "@/components/mobile-user-menu";
-import { Bell, Users, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
+import { Bell, Users } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
 const definexusLogo = "/lovable-uploads/bf68da2b-8484-42fd-bf25-c6cfa88cbe26.png";
@@ -49,9 +47,10 @@ const Home = () => {
   }
 
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}:00`;
+    return `${hours.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   const handleStartTimer = () => {
@@ -133,26 +132,6 @@ const Home = () => {
                   </div>
                   <span className="text-xl font-mono">{formatTime(timeLeft)}</span>
               </div>
-              </div>
-
-              {/* Invite Section */}
-              <div className="bg-white/30 backdrop-blur-sm rounded-2xl p-6 md:p-8 mx-4 md:mx-0">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-                  <div className="flex items-center gap-4">
-                    <div className="rounded-full p-3" style={{ backgroundColor: '#7D0101' }}>
-                      <Plus className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="text-center md:text-left">
-                      <p className="text-gray-800 font-medium text-lg">
-                        1 more friend = 25% bonus
-                      </p>
-                      <p className="text-gray-700">rate, uncapped!</p>
-                    </div>
-                  </div>
-                  <Button className="text-white px-6 py-3 rounded-xl font-medium transition-opacity hover:opacity-90" style={{ backgroundColor: '#7D0101' }}>
-                    Invite Now →
-                  </Button>
-                </div>
               </div>
             </div>
           </main>
