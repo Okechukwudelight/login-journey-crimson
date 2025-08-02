@@ -15,7 +15,9 @@ const Swap = () => {
   const [hasWallet, setHasWallet] = useState(false);
   const [searchAddress, setSearchAddress] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { addCustomToken, tokens } = useTokens();
+  const [selectedFromToken, setSelectedFromToken] = useState<string>("avax");
+  const [selectedToToken, setSelectedToToken] = useState<string>("usdt");
+  const { addCustomToken, tokens, loading } = useTokens();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -34,6 +36,21 @@ const Swap = () => {
       </div>
     );
   }
+
+  // Get user's AVAX balance
+  const avaxToken = tokens.find(token => token.token_symbol === 'AVAX');
+  const avaxBalance = avaxToken ? avaxToken.balance : 0;
+
+  // Get selected token details
+  const fromToken = tokens.find(token => 
+    selectedFromToken === 'avax' ? token.token_symbol === 'AVAX' : token.id === selectedFromToken
+  ) || { balance: 0, token_symbol: 'AVAX', token_image: '/lovable-uploads/eed6b042-1aa0-4ad2-bda2-0ba7736494c6.png' };
+
+  const toToken = tokens.find(token => 
+    selectedToToken === 'usdt' ? token.token_symbol === 'USDT' : 
+    selectedToToken === 'usdc' ? token.token_symbol === 'USDC' : 
+    token.id === selectedToToken
+  );
 
   const handleSwap = () => {
     setIsSwapped(!isSwapped);
@@ -89,43 +106,39 @@ const Swap = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm text-muted-foreground">
                     <span>You'll pay</span>
-                    <span>Balance: 0.00</span>
+                    <span>Balance: {fromToken.balance.toFixed(6)}</span>
                   </div>
                   
                   <div className="flex items-center justify-between bg-secondary/30 rounded-lg p-3">
                     {!isSwapped ? (
                       <div className="flex items-center gap-2">
-                        <img src="/lovable-uploads/eed6b042-1aa0-4ad2-bda2-0ba7736494c6.png" alt="AVAX" className="w-6 h-6 rounded-full" />
+                        <img src={fromToken.token_image || "/lovable-uploads/eed6b042-1aa0-4ad2-bda2-0ba7736494c6.png"} alt="AVAX" className="w-6 h-6 rounded-full" />
                         <span className="font-medium">AVAX</span>
                       </div>
                     ) : (
-                      <Select defaultValue="usdt">
+                      <Select value={selectedFromToken} onValueChange={setSelectedFromToken}>
                         <SelectTrigger className="w-auto border-none bg-transparent p-0 h-auto focus:ring-0 [&>svg]:hidden">
                           <div className="flex items-center gap-2">
-                            <img src="/lovable-uploads/2a45c57a-70e8-4c85-81d7-a9bf54acff10.png" alt="USDT" className="w-6 h-6 rounded-full" />
-                            <span className="font-medium">USDT</span>
+                            <img src={fromToken.token_image || "/lovable-uploads/2a45c57a-70e8-4c85-81d7-a9bf54acff10.png"} alt={fromToken.token_symbol} className="w-6 h-6 rounded-full" />
+                            <span className="font-medium">{fromToken.token_symbol}</span>
                             <ChevronDown className="h-4 w-4 text-muted-foreground" />
                           </div>
                         </SelectTrigger>
                         <SelectContent className="bg-background border border-border z-50">
-                          <SelectItem value="usdt">
-                            <div className="flex items-center gap-2">
-                              <img src="/lovable-uploads/2a45c57a-70e8-4c85-81d7-a9bf54acff10.png" alt="USDT" className="w-4 h-4 rounded-full" />
-                              <span>USDT</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="usdc">
-                            <div className="flex items-center gap-2">
-                              <img src="/lovable-uploads/67018b70-553d-4f6e-9045-33cf3d7dd229.png" alt="USDC" className="w-4 h-4 rounded-full" />
-                              <span>USDC</span>
-                            </div>
-                          </SelectItem>
+                          {tokens.map((token) => (
+                            <SelectItem key={token.id} value={token.id}>
+                              <div className="flex items-center gap-2">
+                                <img src={token.token_image || "/lovable-uploads/2a45c57a-70e8-4c85-81d7-a9bf54acff10.png"} alt={token.token_symbol} className="w-4 h-4 rounded-full" />
+                                <span>{token.token_symbol}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     )}
                     <input 
                       type="text" 
-                      defaultValue={!isSwapped ? "1207" : "1206.73"}
+                      defaultValue="0"
                       className="text-xl font-medium text-right bg-transparent border-none outline-none focus:ring-0" 
                     />
                   </div>
@@ -149,16 +162,16 @@ const Swap = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between text-sm text-muted-foreground">
                     <span>You'll receive</span>
-                    <span>Balance: 0.00</span>
+                    <span>Balance: {toToken ? toToken.balance.toFixed(6) : '0.00'}</span>
                   </div>
                   
                   <div className="flex items-center justify-between bg-secondary/30 rounded-lg p-3">
                     {!isSwapped ? (
-                      <Select defaultValue="usdt">
+                      <Select value={selectedToToken} onValueChange={setSelectedToToken}>
                         <SelectTrigger className="w-auto border-none bg-transparent p-0 h-auto focus:ring-0 [&>svg]:hidden">
                           <div className="flex items-center gap-2">
-                            <img src="/lovable-uploads/2a45c57a-70e8-4c85-81d7-a9bf54acff10.png" alt="USDT" className="w-6 h-6 rounded-full" />
-                            <span className="font-medium">USDT</span>
+                            <img src={toToken?.token_image || "/lovable-uploads/2a45c57a-70e8-4c85-81d7-a9bf54acff10.png"} alt={toToken?.token_symbol || "USDT"} className="w-6 h-6 rounded-full" />
+                            <span className="font-medium">{toToken?.token_symbol || "USDT"}</span>
                             <ChevronDown className="h-4 w-4 text-muted-foreground" />
                           </div>
                         </SelectTrigger>
@@ -175,6 +188,14 @@ const Swap = () => {
                               <span>USDC</span>
                             </div>
                           </SelectItem>
+                          {tokens.map((token) => (
+                            <SelectItem key={token.id} value={token.id}>
+                              <div className="flex items-center gap-2">
+                                <img src={token.token_image || "/lovable-uploads/2a45c57a-70e8-4c85-81d7-a9bf54acff10.png"} alt={token.token_symbol} className="w-4 h-4 rounded-full" />
+                                <span>{token.token_symbol}</span>
+                              </div>
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     ) : (
@@ -184,7 +205,7 @@ const Swap = () => {
                       </div>
                     )}
                     <div className="text-xl font-medium text-right text-cyan-400">
-                      {!isSwapped ? "1206.73" : "1207"}
+                      0
                     </div>
                   </div>
                 </div>

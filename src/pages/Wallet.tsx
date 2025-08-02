@@ -79,7 +79,7 @@ const Wallet = () => {
                   ) : tokens.length === 0 ? (
                     <Card className="border border-border/50">
                       <CardContent className="p-6">
-                        <p className="text-center text-muted-foreground">No tokens found. Connect your wallet to fetch tokens.</p>
+                        <p className="text-center text-muted-foreground">No tokens found</p>
                       </CardContent>
                     </Card>
                   ) : (

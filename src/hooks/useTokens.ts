@@ -80,15 +80,47 @@ export const useTokens = () => {
 
     setLoading(true);
     try {
-      // This is a simplified version - in a real app you'd call a contract to get token details
+      // Connect to Avalanche network to get token details
+      const provider = new ethers.JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc');
+      
+      // ERC-20 ABI for basic token info
+      const erc20Abi = [
+        "function name() view returns (string)",
+        "function symbol() view returns (string)",
+        "function decimals() view returns (uint8)",
+        "function balanceOf(address) view returns (uint256)"
+      ];
+
+      const contract = new ethers.Contract(tokenAddress, erc20Abi, provider);
+      
+      // Get token details
+      const [name, symbol, decimals] = await Promise.all([
+        contract.name(),
+        contract.symbol(),
+        contract.decimals()
+      ]);
+
+      // Get user's wallet address from profile to check balance
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('wallet_address')
+        .eq('user_id', user.id)
+        .single();
+
+      let balance = 0;
+      if (profile?.wallet_address) {
+        const balanceWei = await contract.balanceOf(profile.wallet_address);
+        balance = parseFloat(ethers.formatUnits(balanceWei, decimals));
+      }
+
       const { data, error } = await supabase
         .from('user_tokens')
         .upsert({
           user_id: user.id,
           token_address: tokenAddress.toLowerCase(),
-          token_name: 'Custom Token',
-          token_symbol: 'CUSTOM',
-          balance: 0,
+          token_name: name,
+          token_symbol: symbol,
+          balance: balance,
           network: 'avalanche'
         })
         .select()
