@@ -1,6 +1,8 @@
 import { useState, useCallback } from 'react';
 import { ethers } from 'ethers';
 import { useToast } from './use-toast';
+import { useProfile } from './useProfile';
+import { useTokens } from './useTokens';
 
 interface WalletInfo {
   address: string;
@@ -11,6 +13,8 @@ export const useWalletConnection = () => {
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
   const [connecting, setConnecting] = useState(false);
   const { toast } = useToast();
+  const { updateWalletAddress } = useProfile();
+  const { fetchTokensFromWallet } = useTokens();
 
   // Load wallet from localStorage on mount
   useState(() => {
@@ -40,6 +44,11 @@ export const useWalletConnection = () => {
       const walletInfo = { address, provider: 'MetaMask' };
       setWallet(walletInfo);
       localStorage.setItem('walletConnection', JSON.stringify(walletInfo));
+      
+      // Save wallet address to user profile and fetch tokens
+      await updateWalletAddress(address);
+      await fetchTokensFromWallet(address);
+      
       toast({
         title: "Connected",
         description: `Connected to MetaMask: ${address.slice(0, 6)}...${address.slice(-4)}`,
@@ -78,6 +87,11 @@ export const useWalletConnection = () => {
       const walletInfo = { address, provider: 'Core Wallet' };
       setWallet(walletInfo);
       localStorage.setItem('walletConnection', JSON.stringify(walletInfo));
+      
+      // Save wallet address to user profile and fetch tokens
+      await updateWalletAddress(address);
+      await fetchTokensFromWallet(address);
+      
       toast({
         title: "Connected",
         description: `Connected to Core Wallet: ${address.slice(0, 6)}...${address.slice(-4)}`,

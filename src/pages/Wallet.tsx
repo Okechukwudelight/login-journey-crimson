@@ -7,15 +7,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { WalletConnect } from "@/components/wallet-connect";
 import { useEffect, useState } from "react";
+import { useTokens } from "@/hooks/useTokens";
+import { useProfile } from "@/hooks/useProfile";
 
 const Wallet = () => {
   const [hasWallet, setHasWallet] = useState(false);
+  const { tokens, loading } = useTokens();
+  const { profile } = useProfile();
 
   useEffect(() => {
     // Check if user has connected wallet
     const walletConnection = localStorage.getItem('walletConnection');
     setHasWallet(!!walletConnection);
   }, []);
+
+  // Calculate total portfolio value
+  const portfolioValue = tokens.reduce((total, token) => {
+    return total + (token.usd_value || 0);
+  }, 0);
 
   if (!hasWallet) {
     return <WalletConnect />;
@@ -39,7 +48,7 @@ const Wallet = () => {
                 <Card className="bg-card/50 border border-border/50">
                   <CardContent className="p-4">
                     <p className="text-sm text-muted-foreground mb-1">Portfolio Value</p>
-                    <p className="text-2xl font-bold">$0.67</p>
+                    <p className="text-2xl font-bold">${portfolioValue.toFixed(2)}</p>
                   </CardContent>
                 </Card>
                 
@@ -61,47 +70,47 @@ const Wallet = () => {
                 </TabsList>
                 
                 <TabsContent value="tokens" className="space-y-4">
-                  {/* AVAX Token */}
-                  <Card className="border border-border/50">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                            <img src="/lovable-uploads/eed6b042-1aa0-4ad2-bda2-0ba7736494c6.png" alt="AVAX" className="w-10 h-10 rounded-full" />
+                  {loading ? (
+                    <Card className="border border-border/50">
+                      <CardContent className="p-6">
+                        <p className="text-center text-muted-foreground">Loading tokens...</p>
+                      </CardContent>
+                    </Card>
+                  ) : tokens.length === 0 ? (
+                    <Card className="border border-border/50">
+                      <CardContent className="p-6">
+                        <p className="text-center text-muted-foreground">No tokens found. Connect your wallet to fetch tokens.</p>
+                      </CardContent>
+                    </Card>
+                  ) : (
+                    tokens.map((token) => (
+                      <Card key={token.id} className="border border-border/50">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+                                <img 
+                                  src={token.token_image || "/lovable-uploads/eed6b042-1aa0-4ad2-bda2-0ba7736494c6.png"} 
+                                  alt={token.token_symbol} 
+                                  className="w-10 h-10 rounded-full" 
+                                />
+                              </div>
+                              <div>
+                                <p className="font-medium">{token.token_symbol}</p>
+                                <p className="text-sm text-muted-foreground">{token.token_name}</p>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-medium">{token.balance.toFixed(6)}</p>
+                              <p className="text-sm text-muted-foreground">
+                                ${token.usd_value ? token.usd_value.toFixed(2) : '0.00'}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium">AVAX</p>
-                            <p className="text-sm text-muted-foreground">Avalanche</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium">0.0122</p>
-                          <p className="text-sm text-muted-foreground">$0.3</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  {/* SENA Token */}
-                  <Card className="border border-border/50">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                            <img src="https://images.unsplash.com/photo-1487058792275-0ad4aaf24ca7?w=40&h=40&fit=crop" alt="SENA" className="w-10 h-10 rounded-full" />
-                          </div>
-                          <div>
-                            <p className="font-medium">$ENA</p>
-                            <p className="text-sm text-muted-foreground">Everyone Needs Avax</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium">156.30M</p>
-                          <p className="text-sm text-muted-foreground">$0.37</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
                 </TabsContent>
                 
                 <TabsContent value="activity" className="space-y-4">
