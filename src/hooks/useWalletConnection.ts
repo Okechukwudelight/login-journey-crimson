@@ -4,6 +4,7 @@ import { useToast } from './use-toast';
 import { useProfile } from './useProfile';
 import { useTokens } from './useTokens';
 import { useAuth } from './useAuth';
+import { supabase } from '@/integrations/supabase/client';
 
 interface WalletInfo {
   address: string;
@@ -27,15 +28,6 @@ export const useWalletConnection = () => {
   });
 
   const connectMetaMask = useCallback(async () => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in first before connecting wallet",
-        variant: "destructive",
-      });
-      return false;
-    }
-
     if (!window.ethereum) {
       toast({
         title: "MetaMask Not Found",
@@ -51,6 +43,42 @@ export const useWalletConnection = () => {
       await provider.send("eth_requestAccounts", []);
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
+
+      // Check if this wallet address is already registered
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('wallet_address', address)
+        .single();
+
+      if (!existingProfile) {
+        toast({
+          title: "Wallet Not Registered",
+          description: "This wallet address is not linked to any account. Please sign up with email/password or Google first, then link your wallet.",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      // If user is logged in but trying to connect a different wallet
+      if (user && existingProfile.user_id !== user.id) {
+        toast({
+          title: "Wallet Belongs to Another Account",
+          description: "This wallet is linked to a different account. Please use the correct wallet or sign in to the associated account.",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      // If user is not logged in but wallet is registered, require login first
+      if (!user) {
+        toast({
+          title: "Please Sign In First",
+          description: "This wallet is registered. Please sign in to your account first, then connect your wallet.",
+          variant: "destructive",
+        });
+        return false;
+      }
 
       const walletInfo = { address, provider: 'MetaMask' };
       setWallet(walletInfo);
@@ -78,15 +106,6 @@ export const useWalletConnection = () => {
   }, [toast, user, updateWalletAddress, fetchTokensFromWallet]);
 
   const connectCoreWallet = useCallback(async () => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please sign in first before connecting wallet",
-        variant: "destructive",
-      });
-      return false;
-    }
-
     // Check for Core Wallet (Avalanche Core)
     if (!window.ethereum || !window.ethereum.isAvalanche) {
       toast({
@@ -103,6 +122,42 @@ export const useWalletConnection = () => {
       await provider.send("eth_requestAccounts", []);
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
+
+      // Check if this wallet address is already registered
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('user_id')
+        .eq('wallet_address', address)
+        .single();
+
+      if (!existingProfile) {
+        toast({
+          title: "Wallet Not Registered",
+          description: "This wallet address is not linked to any account. Please sign up with email/password or Google first, then link your wallet.",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      // If user is logged in but trying to connect a different wallet
+      if (user && existingProfile.user_id !== user.id) {
+        toast({
+          title: "Wallet Belongs to Another Account",
+          description: "This wallet is linked to a different account. Please use the correct wallet or sign in to the associated account.",
+          variant: "destructive",
+        });
+        return false;
+      }
+
+      // If user is not logged in but wallet is registered, require login first
+      if (!user) {
+        toast({
+          title: "Please Sign In First",
+          description: "This wallet is registered. Please sign in to your account first, then connect your wallet.",
+          variant: "destructive",
+        });
+        return false;
+      }
 
       const walletInfo = { address, provider: 'Core Wallet' };
       setWallet(walletInfo);
