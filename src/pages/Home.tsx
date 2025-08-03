@@ -109,6 +109,7 @@ const Home = () => {
     setIsRunning(false);
     setDnxRate(0.00000);
     setTimeLeft(0);
+    // Add earnings to total instead of resetting
     setTotalDnxEarned(prev => prev + finalDnxEarned);
   };
 

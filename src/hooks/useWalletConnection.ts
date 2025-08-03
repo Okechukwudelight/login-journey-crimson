@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import { useToast } from './use-toast';
 import { useProfile } from './useProfile';
 import { useTokens } from './useTokens';
+import { useAuth } from './useAuth';
 
 interface WalletInfo {
   address: string;
@@ -13,6 +14,7 @@ export const useWalletConnection = () => {
   const [wallet, setWallet] = useState<WalletInfo | null>(null);
   const [connecting, setConnecting] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth();
   const { updateWalletAddress } = useProfile();
   const { fetchTokensFromWallet } = useTokens();
 
@@ -25,6 +27,15 @@ export const useWalletConnection = () => {
   });
 
   const connectMetaMask = useCallback(async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in first before connecting wallet",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     if (!window.ethereum) {
       toast({
         title: "MetaMask Not Found",
@@ -64,9 +75,18 @@ export const useWalletConnection = () => {
     } finally {
       setConnecting(false);
     }
-  }, [toast]);
+  }, [toast, user, updateWalletAddress, fetchTokensFromWallet]);
 
   const connectCoreWallet = useCallback(async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in first before connecting wallet",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     // Check for Core Wallet (Avalanche Core)
     if (!window.ethereum || !window.ethereum.isAvalanche) {
       toast({
@@ -107,7 +127,7 @@ export const useWalletConnection = () => {
     } finally {
       setConnecting(false);
     }
-  }, [toast]);
+  }, [toast, user, updateWalletAddress, fetchTokensFromWallet]);
 
   return {
     wallet,

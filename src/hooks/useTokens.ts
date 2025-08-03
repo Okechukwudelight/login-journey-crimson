@@ -78,6 +78,11 @@ export const useTokens = () => {
   const addCustomToken = async (tokenAddress: string) => {
     if (!user || !tokenAddress) return null;
 
+    // Validate token address format
+    if (!ethers.isAddress(tokenAddress)) {
+      throw new Error('Invalid contract address format');
+    }
+
     setLoading(true);
     try {
       // Connect to Avalanche network to get token details
@@ -93,7 +98,7 @@ export const useTokens = () => {
 
       const contract = new ethers.Contract(tokenAddress, erc20Abi, provider);
       
-      // Get token details
+      // Get token details with timeout
       const [name, symbol, decimals] = await Promise.all([
         contract.name(),
         contract.symbol(),
@@ -109,8 +114,13 @@ export const useTokens = () => {
 
       let balance = 0;
       if (profile?.wallet_address) {
-        const balanceWei = await contract.balanceOf(profile.wallet_address);
-        balance = parseFloat(ethers.formatUnits(balanceWei, decimals));
+        try {
+          const balanceWei = await contract.balanceOf(profile.wallet_address);
+          balance = parseFloat(ethers.formatUnits(balanceWei, decimals));
+        } catch (balanceError) {
+          console.warn('Could not fetch balance for token:', balanceError);
+          // Continue with 0 balance if balance fetch fails
+        }
       }
 
       const { data, error } = await supabase
@@ -127,15 +137,14 @@ export const useTokens = () => {
         .single();
 
       if (error) {
-        console.error('Error adding custom token:', error);
-        return null;
+        throw new Error(`Database error: ${error.message}`);
       }
 
       await fetchUserTokens();
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding custom token:', error);
-      return null;
+      throw new Error(error.message || 'Failed to add token. Please check the contract address.');
     } finally {
       setLoading(false);
     }

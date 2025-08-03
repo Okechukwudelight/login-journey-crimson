@@ -66,18 +66,20 @@ const Swap = () => {
       return;
     }
 
-    const result = await addCustomToken(searchAddress.trim());
-    if (result) {
-      toast({
-        title: "Success",
-        description: "Token added successfully",
-      });
-      setSearchAddress("");
-      setIsDialogOpen(false);
-    } else {
+    try {
+      const result = await addCustomToken(searchAddress.trim());
+      if (result) {
+        toast({
+          title: "Success",
+          description: `${result.token_symbol} token added successfully`,
+        });
+        setSearchAddress("");
+        setIsDialogOpen(false);
+      }
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "Failed to add token",
+        description: error.message || "Failed to add token",
         variant: "destructive",
       });
     }
