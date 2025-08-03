@@ -90,7 +90,7 @@ const Wallet = () => {
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
                                 <img 
-                                  src={token.token_image || "/lovable-uploads/eed6b042-1aa0-4ad2-bda2-0ba7736494c6.png"} 
+                                  src={token.token_image || "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=400&fit=crop&crop=center"} 
                                   alt={token.token_symbol} 
                                   className="w-10 h-10 rounded-full" 
                                 />

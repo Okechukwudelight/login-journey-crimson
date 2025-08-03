@@ -215,7 +215,11 @@ const Home = () => {
                     className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 translate-y-1/2 rounded-full w-16 h-16 flex items-center justify-center cursor-pointer transition-opacity hover:opacity-80 disabled:opacity-50 ${isRunning ? 'animate-pulse' : ''}`}
                     style={{ backgroundColor: '#7D0101' }}
                   >
-                    <img src={definexusLogo} alt="Definexus" className="w-10 h-10" />
+                    <img 
+                      src={definexusLogo} 
+                      alt="Definexus" 
+                      className={`w-10 h-10 ${isRunning ? 'animate-pulse opacity-animation' : ''}`}
+                    />
                   </button>
                 </div>
               </div>

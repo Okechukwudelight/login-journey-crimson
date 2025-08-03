@@ -110,3 +110,16 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+.opacity-animation {
+  animation: opacity-pulse 2s ease-in-out infinite;
+}
+
+@keyframes opacity-pulse {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
