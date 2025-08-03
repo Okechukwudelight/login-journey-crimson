@@ -232,6 +232,57 @@ const Home = () => {
                   <span className="text-xl font-mono">{formatTime(timeLeft)}</span>
               </div>
               </div>
+
+              {/* Mining Groups Section */}
+              <div className="mt-8 space-y-4">
+                {/* Create Group Card */}
+                <div className="bg-gray-700 rounded-2xl p-4 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-gray-600 rounded-full p-3">
+                      <Users className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <p className="text-white font-medium">Create a group with friends to</p>
+                      <p className="text-white font-medium">increase performance by 10% for each</p>
+                      <p className="text-white font-medium">member.</p>
+                      <p className="text-orange-400 font-medium mt-1">Invite your friend now</p>
+                    </div>
+                  </div>
+                  <div className="text-white text-2xl">›</div>
+                </div>
+
+                {/* Mining Groups */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-blue-400 font-medium">Mining groups</h3>
+                    <button className="text-gray-400 text-sm">View all</button>
+                  </div>
+                  
+                  <div className="flex items-center gap-4">
+                    {/* Sample Group Members */}
+                    <div className="flex flex-col items-center">
+                      <div className="w-16 h-16 rounded-full bg-orange-400 overflow-hidden">
+                        <img src="/lovable-uploads/2a45c57a-70e8-4c85-81d7-a9bf54acff10.png" alt="Creamshady" className="w-full h-full object-cover" />
+                      </div>
+                      <p className="text-white text-sm mt-1">Creamshady</p>
+                    </div>
+                    
+                    <div className="flex flex-col items-center">
+                      <div className="w-16 h-16 rounded-full bg-teal-500 flex items-center justify-center">
+                        <span className="text-white text-2xl font-bold">M</span>
+                      </div>
+                      <p className="text-white text-sm mt-1">achraf04</p>
+                    </div>
+                    
+                    <div className="flex flex-col items-center">
+                      <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center">
+                        <Users className="w-8 h-8 text-gray-500" />
+                      </div>
+                      <p className="text-white text-sm mt-1">Abbasjafary</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </main>
 
