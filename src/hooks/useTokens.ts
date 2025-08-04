@@ -77,22 +77,34 @@ export const useTokens = () => {
 
   const fetchTokenImageFromCoinGecko = async (tokenAddress: string, symbol: string) => {
     try {
-      // First try to get token info by contract address
-      const response = await fetch(`https://api.coingecko.com/api/v3/coins/avalanche/contract/${tokenAddress.toLowerCase()}`);
-      if (response.ok) {
-        const data = await response.json();
-        return data.image?.large || data.image?.small || null;
+      // First try to get token info by contract address on Avalanche
+      const contractResponse = await fetch(`https://api.coingecko.com/api/v3/coins/avalanche/contract/${tokenAddress.toLowerCase()}`);
+      if (contractResponse.ok) {
+        const contractData = await contractResponse.json();
+        if (contractData.image?.large || contractData.image?.small || contractData.image?.thumb) {
+          return contractData.image.large || contractData.image.small || contractData.image.thumb;
+        }
       }
       
-      // If that fails, try searching by symbol
+      // If contract lookup fails, search by symbol and filter for Avalanche network
       const searchResponse = await fetch(`https://api.coingecko.com/api/v3/search?query=${symbol}`);
       if (searchResponse.ok) {
         const searchData = await searchResponse.json();
         const coin = searchData.coins?.find((coin: any) => 
           coin.symbol.toLowerCase() === symbol.toLowerCase()
         );
-        if (coin) {
-          return coin.large || coin.thumb || null;
+        if (coin && (coin.large || coin.thumb)) {
+          return coin.large || coin.thumb;
+        }
+      }
+      
+      // Additional search by token name if symbol search fails
+      const nameSearchResponse = await fetch(`https://api.coingecko.com/api/v3/search?query=${tokenAddress}`);
+      if (nameSearchResponse.ok) {
+        const nameSearchData = await nameSearchResponse.json();
+        const coin = nameSearchData.coins?.[0];
+        if (coin && (coin.large || coin.thumb)) {
+          return coin.large || coin.thumb;
         }
       }
       

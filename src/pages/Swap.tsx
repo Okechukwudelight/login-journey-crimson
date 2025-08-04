@@ -5,20 +5,16 @@ import { ChevronDown, ArrowDownUp, Info, Search, Plus } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useState, useEffect } from "react";
 import { useTokens } from "@/hooks/useTokens";
-import { useToast } from "@/hooks/use-toast";
+import { AddTokenDialog } from "@/components/add-token-dialog";
 
 const Swap = () => {
   const [isSwapped, setIsSwapped] = useState(false);
   const [hasWallet, setHasWallet] = useState(false);
-  const [searchAddress, setSearchAddress] = useState("");
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedFromToken, setSelectedFromToken] = useState<string>("avax");
   const [selectedToToken, setSelectedToToken] = useState<string>("usdt");
-  const { addCustomToken, tokens, loading } = useTokens();
-  const { toast } = useToast();
+  const { tokens } = useTokens();
 
   useEffect(() => {
     // Check if user has connected wallet
@@ -54,35 +50,6 @@ const Swap = () => {
 
   const handleSwap = () => {
     setIsSwapped(!isSwapped);
-  };
-
-  const handleAddToken = async () => {
-    if (!searchAddress.trim()) {
-      toast({
-        title: "Error",
-        description: "Please enter a valid token address",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const result = await addCustomToken(searchAddress.trim());
-      if (result) {
-        toast({
-          title: "Success",
-          description: `${result.token_symbol} token added successfully`,
-        });
-        setSearchAddress("");
-        setIsDialogOpen(false);
-      }
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message || "Failed to add token",
-        variant: "destructive",
-      });
-    }
   };
 
   return (
@@ -223,35 +190,8 @@ const Swap = () => {
                   </button>
                 </div>
 
-                {/* Add Token Dialog */}
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="outline" className="w-full mb-2">
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Custom Token
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Add Custom Token</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4">
-                      <Input
-                        placeholder="Enter token contract address"
-                        value={searchAddress}
-                        onChange={(e) => setSearchAddress(e.target.value)}
-                      />
-                      <div className="flex gap-2">
-                        <Button variant="outline" onClick={() => setIsDialogOpen(false)} className="flex-1">
-                          Cancel
-                        </Button>
-                        <Button onClick={handleAddToken} className="flex-1">
-                          Add Token
-                        </Button>
-                      </div>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                {/* Add Token Button */}
+                <AddTokenDialog />
 
                 {/* Swap Button */}
                 <button className="w-full py-3 rounded-xl bg-[#7D0101] text-white font-medium">

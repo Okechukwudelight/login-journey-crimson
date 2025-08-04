@@ -13,7 +13,10 @@ const Home = () => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
   const [dnxRate, setDnxRate] = useState(0.00000);
-  const [totalDnxEarned, setTotalDnxEarned] = useState(0);
+  const [totalDnxEarned, setTotalDnxEarned] = useState(() => {
+    const saved = localStorage.getItem('totalDnxEarned');
+    return saved ? parseFloat(saved) : 0;
+  });
 
   // Check for existing mining session on component mount
   useEffect(() => {
@@ -34,8 +37,16 @@ const Home = () => {
           }
           return prev - 1;
         });
-        // Increase DNX rate every second - 0.02 DNX per hour = 0.02/3600 per second
-        setDnxRate((prev) => prev + (0.02 / 3600));
+        // Increase DNX rate every second - 0.01 DNX per hour = 0.01/3600 per second
+        setDnxRate((prev) => {
+          const newRate = prev + (0.01 / 3600);
+          setTotalDnxEarned((prevTotal) => {
+            const newTotal = prevTotal + (0.01 / 3600);
+            localStorage.setItem('totalDnxEarned', newTotal.toString());
+            return newTotal;
+          });
+          return newRate;
+        });
       }, 1000);
     }
     return () => clearInterval(interval);
@@ -67,7 +78,7 @@ const Home = () => {
         // Session is still active
         const remainingSeconds = Math.floor((endTime.getTime() - now.getTime()) / 1000);
         const elapsedSeconds = Math.floor((now.getTime() - startTime.getTime()) / 1000);
-        const currentRate = (elapsedSeconds / 3600) * 0.02; // 0.02 DNX per hour
+        const currentRate = (elapsedSeconds / 3600) * 0.01; // 0.01 DNX per hour
 
         setTimeLeft(remainingSeconds);
         setIsRunning(true);
@@ -83,7 +94,7 @@ const Home = () => {
   const completeMiningSession = async (sessionId?: string) => {
     if (!user) return;
 
-    const finalDnxEarned = 0.48; // 24 hours * 0.02 DNX/hour
+    const finalDnxEarned = 0.24; // 24 hours * 0.01 DNX/hour
 
     if (sessionId) {
       // Update existing session
@@ -110,7 +121,9 @@ const Home = () => {
     setDnxRate(0.00000);
     setTimeLeft(0);
     // Add earnings to total instead of resetting
-    setTotalDnxEarned(prev => prev + finalDnxEarned);
+    const newTotal = totalDnxEarned + finalDnxEarned;
+    setTotalDnxEarned(newTotal);
+    localStorage.setItem('totalDnxEarned', newTotal.toString());
   };
 
   if (loading) {
@@ -198,10 +211,10 @@ const Home = () => {
                     <div className="text-center mb-4">
                       <p className="text-gray-600 text-lg font-medium mb-2">Balance</p>
                       <p className="text-4xl md:text-5xl font-bold text-gray-800">
-                        {totalDnxEarned.toFixed(2)}
+                        {totalDnxEarned.toFixed(5)}
                       </p>
                       <p className="text-lg font-medium mt-2 flex items-center justify-center gap-1" style={{ color: '#7D0101' }}>
-                        1.25 $DNX/hr
+                        0.01 $DNX/hr
                       </p>
                       <div className="flex items-center justify-center gap-2 mt-2 text-gray-600">
                         <Users className="w-4 h-4" />
