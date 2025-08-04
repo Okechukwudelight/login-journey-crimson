@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState, useEffect } from "react";
 import { useTokens } from "@/hooks/useTokens";
-import { AddTokenDialog } from "@/components/add-token-dialog";
+
 
 const Swap = () => {
   const [isSwapped, setIsSwapped] = useState(false);
@@ -189,9 +189,6 @@ const Swap = () => {
                     Show details <ChevronDown className="h-3 w-3" />
                   </button>
                 </div>
-
-                {/* Add Token Button */}
-                <AddTokenDialog />
 
                 {/* Swap Button */}
                 <button className="w-full py-3 rounded-xl bg-[#7D0101] text-white font-medium">

@@ -12,7 +12,10 @@ const Home = () => {
   const { user, loading } = useAuth();
   const [timeLeft, setTimeLeft] = useState(0);
   const [isRunning, setIsRunning] = useState(false);
-  const [dnxRate, setDnxRate] = useState(0.00000);
+  const [dnxRate, setDnxRate] = useState(() => {
+    const saved = localStorage.getItem('dnxRate');
+    return saved ? parseFloat(saved) : 0.00000;
+  });
   const [totalDnxEarned, setTotalDnxEarned] = useState(() => {
     const saved = localStorage.getItem('totalDnxEarned');
     return saved ? parseFloat(saved) : 0;
@@ -40,12 +43,13 @@ const Home = () => {
         // Increase DNX rate every second - 0.01 DNX per hour = 0.01/3600 per second
         setDnxRate((prev) => {
           const newRate = prev + (0.01 / 3600);
-          setTotalDnxEarned((prevTotal) => {
-            const newTotal = prevTotal + (0.01 / 3600);
-            localStorage.setItem('totalDnxEarned', newTotal.toString());
-            return newTotal;
-          });
+          localStorage.setItem('dnxRate', newRate.toString());
           return newRate;
+        });
+        setTotalDnxEarned((prev) => {
+          const newTotal = prev + (0.01 / 3600);
+          localStorage.setItem('totalDnxEarned', newTotal.toString());
+          return newTotal;
         });
       }, 1000);
     }
@@ -210,9 +214,10 @@ const Home = () => {
                   <div className="absolute inset-8 rounded-full bg-white/80 flex flex-col items-center justify-center p-8">
                     <div className="text-center mb-4">
                       <p className="text-gray-600 text-lg font-medium mb-2">Balance</p>
-                      <p className="text-4xl md:text-5xl font-bold text-gray-800">
-                        {totalDnxEarned.toFixed(5)}
-                      </p>
+                       <p className="text-4xl md:text-5xl font-bold text-gray-800">
+                         <span>{Math.floor(totalDnxEarned)}</span>
+                         <span className="text-2xl">.{totalDnxEarned.toFixed(5).split('.')[1]}</span>
+                       </p>
                       <p className="text-lg font-medium mt-2 flex items-center justify-center gap-1" style={{ color: '#7D0101' }}>
                         0.01 $DNX/hr
                       </p>
