@@ -9,6 +9,7 @@ import { WalletConnect } from "@/components/wallet-connect";
 import { useEffect, useState } from "react";
 import { useTokens } from "@/hooks/useTokens";
 import { useProfile } from "@/hooks/useProfile";
+import { AddTokenDialog } from "@/components/add-token-dialog";
 
 const Wallet = () => {
   const [hasWallet, setHasWallet] = useState(false);
@@ -119,10 +120,15 @@ const Wallet = () => {
                       <p className="text-center text-muted-foreground">No recent activity</p>
                     </CardContent>
                   </Card>
-                </TabsContent>
-              </Tabs>
-            </div>
-          </main>
+                 </TabsContent>
+               </Tabs>
+               
+               {/* Add Token Button */}
+               <div className="mt-6">
+                 <AddTokenDialog />
+               </div>
+             </div>
+           </main>
 
           {/* Mobile Bottom Navigation - shown only on mobile */}
           <div className="md:hidden">

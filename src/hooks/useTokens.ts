@@ -75,6 +75,34 @@ export const useTokens = () => {
     }
   };
 
+  const fetchTokenImageFromCoinGecko = async (tokenAddress: string, symbol: string) => {
+    try {
+      // First try to get token info by contract address
+      const response = await fetch(`https://api.coingecko.com/api/v3/coins/avalanche/contract/${tokenAddress.toLowerCase()}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data.image?.large || data.image?.small || null;
+      }
+      
+      // If that fails, try searching by symbol
+      const searchResponse = await fetch(`https://api.coingecko.com/api/v3/search?query=${symbol}`);
+      if (searchResponse.ok) {
+        const searchData = await searchResponse.json();
+        const coin = searchData.coins?.find((coin: any) => 
+          coin.symbol.toLowerCase() === symbol.toLowerCase()
+        );
+        if (coin) {
+          return coin.large || coin.thumb || null;
+        }
+      }
+      
+      return null;
+    } catch (error) {
+      console.warn('Could not fetch token image from CoinGecko:', error);
+      return null;
+    }
+  };
+
   const addCustomToken = async (tokenAddress: string) => {
     if (!user || !tokenAddress) return null;
 
@@ -105,6 +133,9 @@ export const useTokens = () => {
         contract.decimals()
       ]);
 
+      // Try to fetch token image from CoinGecko
+      const tokenImage = await fetchTokenImageFromCoinGecko(tokenAddress, symbol);
+
       // Get user's wallet address from profile to check balance
       const { data: profile } = await supabase
         .from('profiles')
@@ -130,6 +161,7 @@ export const useTokens = () => {
           token_address: tokenAddress.toLowerCase(),
           token_name: name,
           token_symbol: symbol,
+          token_image: tokenImage,
           balance: balance,
           network: 'avalanche'
         })
@@ -150,9 +182,61 @@ export const useTokens = () => {
     }
   };
 
+  const addAvaxToken = async () => {
+    if (!user) return;
+
+    try {
+      // Check if AVAX token already exists for this user
+      const { data: existingToken } = await supabase
+        .from('user_tokens')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('token_address', '0x0000000000000000000000000000000000000000')
+        .single();
+
+      if (existingToken) return; // AVAX already exists
+
+      // Get user's wallet address to check AVAX balance
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('wallet_address')
+        .eq('user_id', user.id)
+        .single();
+
+      let balance = 0;
+      if (profile?.wallet_address) {
+        try {
+          const provider = new ethers.JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc');
+          const avaxBalance = await provider.getBalance(profile.wallet_address);
+          balance = parseFloat(ethers.formatEther(avaxBalance));
+        } catch (error) {
+          console.warn('Could not fetch AVAX balance:', error);
+        }
+      }
+
+      // Add AVAX token
+      await supabase
+        .from('user_tokens')
+        .insert({
+          user_id: user.id,
+          token_address: '0x0000000000000000000000000000000000000000',
+          token_name: 'Avalanche',
+          token_symbol: 'AVAX',
+          token_image: 'https://cryptologos.cc/logos/avalanche-avax-logo.png',
+          balance: balance,
+          network: 'avalanche'
+        });
+
+      await fetchUserTokens();
+    } catch (error) {
+      console.error('Error adding AVAX token:', error);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchUserTokens();
+      addAvaxToken(); // Automatically add AVAX token
     } else {
       setTokens([]);
     }
@@ -163,6 +247,7 @@ export const useTokens = () => {
     loading,
     fetchTokensFromWallet,
     fetchUserTokens,
-    addCustomToken
+    addCustomToken,
+    addAvaxToken
   };
 };

@@ -197,9 +197,11 @@ const Home = () => {
                   <div className="absolute inset-8 rounded-full bg-white/80 flex flex-col items-center justify-center p-8">
                     <div className="text-center mb-4">
                       <p className="text-gray-600 text-lg font-medium mb-2">Balance</p>
-                      <p className="text-4xl md:text-5xl font-bold text-gray-800">0</p>
+                      <p className="text-4xl md:text-5xl font-bold text-gray-800">
+                        {totalDnxEarned.toFixed(2)}
+                      </p>
                       <p className="text-lg font-medium mt-2 flex items-center justify-center gap-1" style={{ color: '#7D0101' }}>
-                        {dnxRate.toFixed(5)} DNX/hr
+                        1.25 $DNX/hr
                       </p>
                       <div className="flex items-center justify-center gap-2 mt-2 text-gray-600">
                         <Users className="w-4 h-4" />
