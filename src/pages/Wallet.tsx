@@ -17,6 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ethers } from "ethers";
+import { decryptJson } from "@/lib/crypto";
 import { useAuth } from "@/hooks/useAuth";
 import { LogOut, Copy, Check, Download } from "lucide-react";
 import QRCode from "react-qr-code";
@@ -56,7 +57,7 @@ const Wallet = () => {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!window.ethereum) return;
+    const hasProvider = typeof window !== 'undefined' && (window as any).ethereum;
     if (!ethers.isAddress(toAddress)) {
       toast({ title: 'Invalid address', description: 'Please enter a valid address', variant: 'destructive' });
       return;
@@ -68,8 +69,23 @@ const Wallet = () => {
     }
     setSending(true);
     try {
-      const provider = new ethers.BrowserProvider(window.ethereum as any);
-      const signer = await provider.getSigner();
+      let signer: ethers.Signer;
+      if (hasProvider) {
+        const provider = new ethers.BrowserProvider((window as any).ethereum);
+        signer = await provider.getSigner();
+      } else {
+        // No external wallet: try local wallet
+        const stored = localStorage.getItem('localWallet');
+        if (!stored) throw new Error('No wallet connected');
+        const { enc } = JSON.parse(stored);
+        const pwd = prompt('Enter your wallet password to unlock');
+        if (!pwd) throw new Error('Password required');
+        const payload = await decryptJson(enc, pwd);
+        // Derive EVM (C-Chain) signer from mnemonic using ethers
+        const provider = new ethers.JsonRpcProvider('https://api.avax.network/ext/bc/C/rpc');
+        const walletFromMnemonic = ethers.Wallet.fromPhrase(payload.mnemonic);
+        signer = walletFromMnemonic.connect(provider);
+      }
       let txHash = '';
       if (selectedToken === 'avax') {
         const tx = await signer.sendTransaction({ to: toAddress, value: ethers.parseEther(String(value)) });
