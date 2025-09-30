@@ -21,6 +21,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { LogOut, Copy, Check, Download } from "lucide-react";
 import QRCode from "react-qr-code";
 import definexusLogo from "@/assets/defiweld-logo.jpg";
+import avaxLogo from "@/assets/avalanche-logo.png";
 
 const Wallet = () => {
   const [hasWallet, setHasWallet] = useState(false);
@@ -156,8 +157,8 @@ const Wallet = () => {
                             type="button"
                             variant="outline"
                             onClick={() => {
-                              const svg = document.getElementById('wallet-qr') as SVGSVGElement | null;
-                              if (!svg) return;
+                              const svg = document.getElementById('wallet-qr');
+                              if (!(svg instanceof SVGSVGElement)) return;
                               const serializer = new XMLSerializer();
                               const svgString = serializer.serializeToString(svg);
                               const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
@@ -276,7 +277,7 @@ const Wallet = () => {
                             <SelectContent>
                               <SelectItem value="avax">
                                 <div className="flex items-center gap-2">
-                                  <img src={'/src/assets/avalanche-logo.png'} alt="AVAX" className="w-5 h-5 rounded-full" />
+                                  <img src={avaxLogo} alt="AVAX" className="w-5 h-5 rounded-full" />
                                   <span>AVAX</span>
                                 </div>
                               </SelectItem>
