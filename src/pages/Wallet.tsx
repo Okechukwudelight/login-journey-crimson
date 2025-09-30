@@ -17,7 +17,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ethers } from "ethers";
 import { useAuth } from "@/hooks/useAuth";
-import { LogOut } from "lucide-react";
+import { LogOut, Copy } from "lucide-react";
 
 const Wallet = () => {
   const [hasWallet, setHasWallet] = useState(false);
@@ -116,7 +116,27 @@ const Wallet = () => {
                       </DialogHeader>
                       <div className="space-y-2">
                         <Label>Wallet address</Label>
-                        <Input readOnly value={wallet?.address || ''} onFocus={(e) => e.currentTarget.select()} />
+                        <div className="flex items-center gap-2">
+                          <Input readOnly value={wallet?.address || ''} />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="icon"
+                            onClick={async () => {
+                              if (wallet?.address) {
+                                try {
+                                  await navigator.clipboard.writeText(wallet.address);
+                                  toast({ title: 'Copied', description: 'Address copied to clipboard' });
+                                } catch (err: any) {
+                                  toast({ title: 'Copy failed', description: err?.message || 'Could not copy', variant: 'destructive' });
+                                }
+                              }
+                            }}
+                            aria-label="Copy address"
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </DialogContent>
                   </Dialog>
