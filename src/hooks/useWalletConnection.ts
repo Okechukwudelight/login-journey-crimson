@@ -45,6 +45,32 @@ export const useWalletConnection = () => {
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
 
+      // Ensure network is Avalanche mainnet (chainId 0xa86a)
+      try {
+        await (window.ethereum as any).request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0xa86a' }],
+        });
+      } catch (switchError: any) {
+        // If the chain has not been added to MetaMask
+        if (switchError?.code === 4902) {
+          try {
+            await (window.ethereum as any).request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: '0xa86a',
+                chainName: 'Avalanche C-Chain',
+                nativeCurrency: { name: 'Avalanche', symbol: 'AVAX', decimals: 18 },
+                rpcUrls: ['https://api.avax.network/ext/bc/C/rpc'],
+                blockExplorerUrls: ['https://snowtrace.io/'],
+              }],
+            });
+          } catch (addError: any) {
+            // Non-fatal; user can still view balances
+          }
+        }
+      }
+
       // Require sign-in before linking wallet
       if (!user) {
         toast({
@@ -97,6 +123,31 @@ export const useWalletConnection = () => {
       await provider.send("eth_requestAccounts", []);
       const signer = await provider.getSigner();
       const address = await signer.getAddress();
+
+      // Ensure network is Avalanche mainnet (chainId 0xa86a)
+      try {
+        await (window.ethereum as any).request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0xa86a' }],
+        });
+      } catch (switchError: any) {
+        if (switchError?.code === 4902) {
+          try {
+            await (window.ethereum as any).request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: '0xa86a',
+                chainName: 'Avalanche C-Chain',
+                nativeCurrency: { name: 'Avalanche', symbol: 'AVAX', decimals: 18 },
+                rpcUrls: ['https://api.avax.network/ext/bc/C/rpc'],
+                blockExplorerUrls: ['https://snowtrace.io/'],
+              }],
+            });
+          } catch (addError: any) {
+            // Non-fatal
+          }
+        }
+      }
 
       // Require sign-in before linking wallet
       if (!user) {

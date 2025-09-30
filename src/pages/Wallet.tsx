@@ -17,11 +17,13 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ethers } from "ethers";
 import { useAuth } from "@/hooks/useAuth";
-import { LogOut, Copy } from "lucide-react";
+import { LogOut, Copy, Check, Download } from "lucide-react";
+import QRCode from "react-qr-code";
+import definexusLogo from "@/assets/defiweld-logo.jpg";
 
 const Wallet = () => {
   const [hasWallet, setHasWallet] = useState(false);
-  const { tokens, loading } = useTokens();
+  const { tokens, loading, fetchTokensFromWallet, activity } = useTokens();
   const { profile } = useProfile();
   const { wallet, disconnect } = useWalletConnection();
   const { toast } = useToast();
@@ -31,6 +33,8 @@ const Wallet = () => {
   const [toAddress, setToAddress] = useState("");
   const [amount, setAmount] = useState("");
   const [sending, setSending] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const qrRef = useState<SVGSVGElement | null>(null)[0];
 
   useEffect(() => {
     // Check if user has connected wallet
@@ -66,6 +70,10 @@ const Wallet = () => {
       const tx = await signer.sendTransaction({ to: toAddress, value: ethers.parseEther(String(value)) });
       await tx.wait();
       toast({ title: 'Sent', description: `Tx: ${tx.hash.slice(0, 10)}...` });
+      if (wallet?.address) {
+        // Refresh balances immediately after confirmation
+        await fetchTokensFromWallet(wallet.address);
+      }
       setSendOpen(false);
       setToAddress("");
       setAmount("");
@@ -106,7 +114,7 @@ const Wallet = () => {
                 <div className="grid grid-cols-2 gap-3">
                   <Dialog open={recvOpen} onOpenChange={setRecvOpen}>
                     <DialogTrigger asChild>
-                      <Button variant="outline" className="h-10 px-6 rounded-lg border-[#7D0101] hover:bg-[#7D0101]/10">
+                  <Button variant="outline" className="h-10 px-6 rounded-lg border-[#7D0101] hover:bg-[#7D0101]/10">
                         <span className="text-sm font-medium">Receive</span>
                       </Button>
                     </DialogTrigger>
@@ -114,7 +122,92 @@ const Wallet = () => {
                       <DialogHeader>
                         <DialogTitle>Your address</DialogTitle>
                       </DialogHeader>
-                      <div className="space-y-2">
+                      <div className="space-y-4">
+                        <div className="w-full flex justify-center py-2">
+                          <div className="bg-white p-2 rounded inline-flex items-center justify-center relative">
+                            <QRCode value={wallet?.address ? `ethereum:${wallet.address}@43114` : ''} size={160} id="wallet-qr" />
+                            {/* Center logo overlay */}
+                            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                              <div className="bg-white rounded-full p-1">
+                                <img src={definexusLogo} alt="logo" className="w-8 h-8 object-contain rounded-full" />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="w-full flex justify-center">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              const svg = document.getElementById('wallet-qr') as SVGSVGElement | null;
+                              if (!svg) return;
+                              const serializer = new XMLSerializer();
+                              const svgString = serializer.serializeToString(svg);
+                              const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+                              const url = URL.createObjectURL(svgBlob);
+                              const img = new Image();
+                              img.onload = () => {
+                                const scale = 4; // increase resolution
+                                const canvas = document.createElement('canvas');
+                                const size = (svg.viewBox && (svg.viewBox.baseVal?.width || 0)) || svg.clientWidth || 144;
+                                const margin = Math.floor((size * scale) * 0.08); // 8% margin
+                                canvas.width = size * scale + margin * 2;
+                                canvas.height = size * scale + margin * 2;
+                                const ctx = canvas.getContext('2d');
+                                if (!ctx) return;
+                                // white background
+                                ctx.fillStyle = '#ffffff';
+                                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                                ctx.imageSmoothingEnabled = false;
+                                ctx.drawImage(img, margin, margin, canvas.width - margin * 2, canvas.height - margin * 2);
+                                URL.revokeObjectURL(url);
+                                // draw center logo
+                                const logo = new Image();
+                                logo.onload = () => {
+                                  const qrDrawSize = canvas.width - margin * 2;
+                                  const logoSize = Math.floor(qrDrawSize * 0.18); // ~18% of QR drawable area
+                                  const x = (canvas.width - logoSize) / 2;
+                                  const y = (canvas.height - logoSize) / 2;
+                                  // circular white backdrop and circular crop for logo
+                                  const pad = Math.floor(logoSize * 0.15);
+                                  const centerX = canvas.width / 2;
+                                  const centerY = canvas.height / 2;
+                                  const radius = Math.floor((logoSize + pad) / 2);
+                                  // draw white circle backdrop
+                                  ctx.fillStyle = '#ffffff';
+                                  ctx.beginPath();
+                                  ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+                                  ctx.closePath();
+                                  ctx.fill();
+                                  // clip to circle and draw logo
+                                  ctx.save();
+                                  ctx.beginPath();
+                                  ctx.arc(centerX, centerY, radius - Math.floor(pad / 2), 0, Math.PI * 2);
+                                  ctx.closePath();
+                                  ctx.clip();
+                                  ctx.drawImage(logo, x, y, logoSize, logoSize);
+                                  ctx.restore();
+                                  canvas.toBlob((blob) => {
+                                    if (!blob) return;
+                                    const pngUrl = URL.createObjectURL(blob);
+                                    const a = document.createElement('a');
+                                    a.href = pngUrl;
+                                    a.download = 'wallet-qr.png';
+                                    document.body.appendChild(a);
+                                    a.click();
+                                    document.body.removeChild(a);
+                                    URL.revokeObjectURL(pngUrl);
+                                  }, 'image/png');
+                                };
+                                logo.src = definexusLogo as unknown as string;
+                              };
+                              img.src = url;
+                            }}
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Save QR
+                  </Button>
+                        </div>
                         <Label>Wallet address</Label>
                         <div className="flex items-center gap-2">
                           <Input readOnly value={wallet?.address || ''} />
@@ -127,6 +220,8 @@ const Wallet = () => {
                                 try {
                                   await navigator.clipboard.writeText(wallet.address);
                                   toast({ title: 'Copied', description: 'Address copied to clipboard' });
+                                  setCopied(true);
+                                  setTimeout(() => setCopied(false), 1500);
                                 } catch (err: any) {
                                   toast({ title: 'Copy failed', description: err?.message || 'Could not copy', variant: 'destructive' });
                                 }
@@ -134,8 +229,12 @@ const Wallet = () => {
                             }}
                             aria-label="Copy address"
                           >
-                            <Copy className="w-4 h-4" />
-                          </Button>
+                            {copied ? (
+                              <Check className="w-4 h-4 text-green-600" />
+                            ) : (
+                              <Copy className="w-4 h-4" />
+                            )}
+                  </Button>
                         </div>
                       </div>
                     </DialogContent>
@@ -202,9 +301,9 @@ const Wallet = () => {
                                 ) : token.token_image ? (
                                   <img 
                                     src={token.token_image} 
-                                    alt={token.token_symbol} 
-                                    className="w-10 h-10 rounded-full" 
-                                  />
+                                  alt={token.token_symbol} 
+                                  className="w-10 h-10 rounded-full" 
+                                />
                                 ) : (
                                   <div className="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center text-white text-xs">
                                     {token.token_symbol?.slice(0, 3) || 'TOK'}
@@ -230,11 +329,28 @@ const Wallet = () => {
                 </TabsContent>
                 
                 <TabsContent value="activity" className="space-y-4">
+                  {activity.length === 0 ? (
                   <Card className="border border-border/50">
                     <CardContent className="p-6">
                       <p className="text-center text-muted-foreground">No recent activity</p>
                     </CardContent>
                   </Card>
+                  ) : (
+                    activity.map((item) => (
+                      <Card key={item.hash} className="border border-border/50">
+                        <CardContent className="p-4 flex items-center justify-between">
+                          <div>
+                            <p className="font-medium capitalize">{item.type}</p>
+                            <p className="text-sm text-muted-foreground">{new Date(item.timeStamp).toLocaleString()}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-mono">{Number(item.valueEth).toFixed(6)} AVAX</p>
+                            <a href={`https://testnet.snowtrace.io/tx/${item.hash}`} target="_blank" rel="noreferrer" className="text-xs text-primary">View</a>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))
+                  )}
                  </TabsContent>
                </Tabs>
                
