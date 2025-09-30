@@ -48,9 +48,17 @@ const Signin = () => {
       });
       window.location.href = "/home";
     } catch (error: any) {
+      // Map Firebase auth error codes to user-friendly messages
+      const code = error?.code as string | undefined;
+      let message = 'Failed to sign in';
+      if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
+        message = 'Incorrect email or password';
+      } else if (code === 'auth/too-many-requests') {
+        message = 'Too many attempts. Please try again later.';
+      }
       toast({
         title: "Error",
-        description: error?.message || "Failed to sign in",
+        description: message,
         variant: "destructive",
       });
     } finally {

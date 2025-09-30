@@ -11,7 +11,6 @@ import { Plus } from "lucide-react";
 export const AddTokenDialog = () => {
   const [open, setOpen] = useState(false);
   const [tokenAddress, setTokenAddress] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
   const { addCustomToken, loading } = useTokens();
   const { wallet } = useWalletConnection();
   const { toast } = useToast();
@@ -29,13 +28,12 @@ export const AddTokenDialog = () => {
     }
 
     try {
-      await addCustomToken(tokenAddress.trim(), imageUrl.trim() || undefined);
+      await addCustomToken(tokenAddress.trim());
       toast({
         title: "Success",
         description: "Token added successfully!",
       });
       setTokenAddress("");
-      setImageUrl("");
       setOpen(false);
     } catch (error: any) {
       toast({
@@ -72,16 +70,6 @@ export const AddTokenDialog = () => {
               placeholder="0x..."
               value={tokenAddress}
               onChange={(e) => setTokenAddress(e.target.value)}
-              disabled={loading}
-            />
-          </div>
-          <div className="space-y-2">
-            <Label htmlFor="imageUrl">Custom Image URL (optional)</Label>
-            <Input
-              id="imageUrl"
-              placeholder="https://.../logo.png"
-              value={imageUrl}
-              onChange={(e) => setImageUrl(e.target.value)}
               disabled={loading}
             />
           </div>

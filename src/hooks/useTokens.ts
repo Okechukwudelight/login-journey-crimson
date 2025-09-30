@@ -120,11 +120,46 @@ export const useTokens = () => {
         network: 'avalanche',
       };
 
-      // Merge AVAX into existing tokens without dropping custom tokens
-      setTokens((prev) => {
-        const withNoAvax = prev.filter(t => t.id !== 'avax');
-        return [...withNoAvax, avaxToken];
-      });
+      // Load any custom ERC-20s saved in localStorage and fetch balances
+      const erc20Abi = [
+        "function name() view returns (string)",
+        "function symbol() view returns (string)",
+        "function decimals() view returns (uint8)",
+        "function balanceOf(address) view returns (uint256)",
+      ];
+      let customTokens: Token[] = [];
+      try {
+        const raw = localStorage.getItem('customTokens');
+        const addrs: string[] = raw ? JSON.parse(raw) : [];
+        if (Array.isArray(addrs) && addrs.length > 0) {
+          for (const ca of addrs) {
+            try {
+              const contract = new ethers.Contract(ca, erc20Abi, provider);
+              const [name, symbol, decimals] = await Promise.all([
+                contract.name(),
+                contract.symbol(),
+                contract.decimals(),
+              ]);
+              const bal = await contract.balanceOf(walletAddress);
+              const balanceNum = parseFloat(ethers.formatUnits(bal, decimals));
+              const img = await fetchTokenImageFromCoinGecko(ca, symbol);
+              customTokens.push({
+                id: `${symbol}-${ca.toLowerCase()}`,
+                user_id: user.uid,
+                token_address: ca.toLowerCase(),
+                token_name: name,
+                token_symbol: symbol,
+                token_image: img || undefined,
+                balance: balanceNum,
+                network: 'avalanche',
+              });
+            } catch {}
+          }
+        }
+      } catch {}
+
+      // Merge: custom tokens + AVAX
+      setTokens([...customTokens, avaxToken]);
     } catch (error) {
       console.error('Error fetching tokens from wallet:', error);
     } finally {
@@ -168,17 +203,34 @@ export const useTokens = () => {
 
   const fetchTokenImageFromCoinGecko = async (tokenAddress: string, symbol: string) => {
     try {
+      // Cache lookup to avoid repeated failed requests
+      try {
+        const key = `tokenLogo:${tokenAddress.toLowerCase()}`;
+        const cached = localStorage.getItem(key);
+        if (cached) {
+          if (cached === 'NONE') return null;
+          return cached;
+        }
+      } catch {}
       // Try several sources tolerant of testnet contracts
       // 1) Trust Wallet assets repo (may not exist for testnet)
       try {
         const tw = await fetch(`https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/avalanchec/assets/${tokenAddress.toLowerCase()}/logo.png`);
-        if (tw.ok) return `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/avalanchec/assets/${tokenAddress.toLowerCase()}/logo.png`;
+        if (tw.ok) {
+          const url = `https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/avalanchec/assets/${tokenAddress.toLowerCase()}/logo.png`;
+          try { localStorage.setItem(`tokenLogo:${tokenAddress.toLowerCase()}`, url); } catch {}
+          return url;
+        }
       } catch {}
 
       // 2) DexScreener token image proxy
       try {
         const ds = await fetch(`https://cdn.dextools.io/tokens/avalanchec/${tokenAddress.toLowerCase()}.png`);
-        if (ds.ok) return `https://cdn.dextools.io/tokens/avalanchec/${tokenAddress.toLowerCase()}.png`;
+        if (ds.ok) {
+          const url = `https://cdn.dextools.io/tokens/avalanchec/${tokenAddress.toLowerCase()}.png`;
+          try { localStorage.setItem(`tokenLogo:${tokenAddress.toLowerCase()}`, url); } catch {}
+          return url;
+        }
       } catch {}
 
       // 3) CoinGecko by contract (often 404 for testnet)
@@ -187,7 +239,9 @@ export const useTokens = () => {
         if (contractResponse.ok) {
           const contractData = await contractResponse.json();
           if (contractData.image?.large || contractData.image?.small || contractData.image?.thumb) {
-            return contractData.image.large || contractData.image.small || contractData.image.thumb;
+            const url = contractData.image.large || contractData.image.small || contractData.image.thumb;
+            try { localStorage.setItem(`tokenLogo:${tokenAddress.toLowerCase()}`, url); } catch {}
+            return url;
           }
         }
       } catch {}
@@ -211,14 +265,21 @@ export const useTokens = () => {
           const nameSearchData = await nameSearchResponse.json();
           const coin = nameSearchData.coins?.[0];
           if (coin && (coin.large || coin.thumb)) {
-            return coin.large || coin.thumb;
+            const url = coin.large || coin.thumb;
+            try { localStorage.setItem(`tokenLogo:${tokenAddress.toLowerCase()}`, url); } catch {}
+            return url;
           }
         }
       } catch {}
       
+      // Cache negative result to suppress repeated lookups
+      try {
+        const key = `tokenLogo:${tokenAddress.toLowerCase()}`;
+        localStorage.setItem(key, 'NONE');
+      } catch {}
       return null;
     } catch (error) {
-      console.warn('Could not fetch token image from CoinGecko:', error);
+      // Swallow image errors silently
       return null;
     }
   };

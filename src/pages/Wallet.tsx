@@ -12,6 +12,7 @@ import { useProfile } from "@/hooks/useProfile";
 import { AddTokenDialog } from "@/components/add-token-dialog";
 import { useWalletConnection } from "@/hooks/useWalletConnection";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
@@ -35,6 +36,7 @@ const Wallet = () => {
   const [sending, setSending] = useState(false);
   const [copied, setCopied] = useState(false);
   const qrRef = useState<SVGSVGElement | null>(null)[0];
+  const [selectedToken, setSelectedToken] = useState<string>('avax');
 
   useEffect(() => {
     // Check if user has connected wallet
@@ -67,9 +69,24 @@ const Wallet = () => {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum as any);
       const signer = await provider.getSigner();
-      const tx = await signer.sendTransaction({ to: toAddress, value: ethers.parseEther(String(value)) });
-      await tx.wait();
-      toast({ title: 'Sent', description: `Tx: ${tx.hash.slice(0, 10)}...` });
+      let txHash = '';
+      if (selectedToken === 'avax') {
+        const tx = await signer.sendTransaction({ to: toAddress, value: ethers.parseEther(String(value)) });
+        await tx.wait();
+        txHash = tx.hash;
+      } else {
+        const erc20Abi = [
+          "function decimals() view returns (uint8)",
+          "function transfer(address to, uint256 value) returns (bool)"
+        ];
+        const contract = new ethers.Contract(selectedToken, erc20Abi, signer);
+        const decimals: number = await contract.decimals();
+        const amountWei = ethers.parseUnits(String(value), decimals);
+        const tx = await contract.transfer(toAddress, amountWei);
+        await tx.wait();
+        txHash = tx.hash;
+      }
+      toast({ title: 'Sent', description: `Tx: ${txHash.slice(0, 10)}...` });
       if (wallet?.address) {
         // Refresh balances immediately after confirmation
         await fetchTokensFromWallet(wallet.address);
@@ -247,15 +264,45 @@ const Wallet = () => {
                     </DialogTrigger>
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Send AVAX</DialogTitle>
+                        <DialogTitle>Send</DialogTitle>
                       </DialogHeader>
                       <form onSubmit={handleSend} className="space-y-3">
+                        <div className="space-y-1">
+                          <Label>Asset</Label>
+                          <Select value={selectedToken} onValueChange={setSelectedToken}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select token" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="avax">
+                                <div className="flex items-center gap-2">
+                                  <img src={'/src/assets/avalanche-logo.png'} alt="AVAX" className="w-5 h-5 rounded-full" />
+                                  <span>AVAX</span>
+                                </div>
+                              </SelectItem>
+                              {tokens.filter(t => t.token_symbol !== 'AVAX').map(t => (
+                                <SelectItem key={t.token_address} value={t.token_address}>
+                                  <div className="flex items-center gap-2">
+                                    {t.token_image ? (
+                                      <img src={t.token_image} alt={t.token_symbol} className="w-5 h-5 rounded-full" />
+                                    ) : (
+                                      <div className="w-5 h-5 rounded-full bg-gray-400 flex items-center justify-center text-[10px] text-white">
+                                        {t.token_symbol?.slice(0, 3) || 'TOK'}
+                                      </div>
+                                    )}
+                                    <span>{t.token_symbol} ({t.balance.toFixed(4)})</span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
                         <div className="space-y-1">
                           <Label>To</Label>
                           <Input value={toAddress} onChange={(e) => setToAddress(e.target.value)} placeholder="0x..." />
                         </div>
                         <div className="space-y-1">
-                          <Label>Amount (AVAX)</Label>
+                          <Label>Amount</Label>
                           <Input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.1" />
                         </div>
                         <Button type="submit" disabled={sending}>{sending ? 'Sending...' : 'Send'}</Button>
