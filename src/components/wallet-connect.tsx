@@ -1,10 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { useWalletConnection } from "@/hooks/useWalletConnection";
+import { useAuth } from "@/hooks/useAuth";
+import { Wallet } from "lucide-react";
 import metamaskLogo from "@/assets/metamask-logo.svg";
 import coreWalletLogo from "/lovable-uploads/e86c25ac-3589-408e-a716-131ab21a5d5c.png";
 
 export function WalletConnect() {
   const { connectMetaMask, connectCoreWallet, connecting } = useWalletConnection();
+  const { user } = useAuth();
 
   const handleMetaMaskConnect = async () => {
     const success = await connectMetaMask();
@@ -25,7 +28,7 @@ export function WalletConnect() {
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-foreground">Connect Wallet</h1>
-          <p className="text-muted-foreground mt-2">Choose your preferred wallet to continue</p>
+          <p className="text-muted-foreground mt-2">{user ? 'Choose your preferred wallet to continue' : 'Please sign in first, then connect your wallet'}</p>
         </div>
 
         <div className="space-y-4">
@@ -47,6 +50,17 @@ export function WalletConnect() {
           >
             <img src={coreWalletLogo} alt="Core Wallet" className="w-6 h-6" />
             Connect Core Wallet
+          </Button>
+
+          <div className="text-center text-xs text-muted-foreground">or</div>
+
+          <Button
+            onClick={() => window.open('https://core.app/', '_blank')}
+            className="w-full h-10"
+            variant="outline"
+          >
+            <Wallet className="w-4 h-4 mr-2" />
+            Create wallet
           </Button>
         </div>
       </div>

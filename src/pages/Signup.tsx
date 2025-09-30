@@ -4,7 +4,10 @@ import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
 import emailjs from "@emailjs/browser";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth } from '@/integrations/firebase/client';
+import { db } from '@/integrations/firebase/client';
+import { doc, setDoc } from 'firebase/firestore';
 import { useWalletConnection } from "@/hooks/useWalletConnection";
 import { useAuth } from "@/hooks/useAuth";
 import googleLogo from "@/assets/google-logo.png";
@@ -22,6 +25,11 @@ const Signup = () => {
   const { connectMetaMask, connectCoreWallet, connecting } = useWalletConnection();
   const { user } = useAuth();
 
+  // EmailJS env config
+  const EMAILJS_PUBLIC_KEY = import.meta.env.VITE_EMAILJS_PUBLIC_KEY as string | undefined;
+  const EMAILJS_SERVICE_ID = import.meta.env.VITE_EMAILJS_SERVICE_ID as string | undefined;
+  const EMAILJS_TEMPLATE_ID = import.meta.env.VITE_EMAILJS_TEMPLATE_ID as string | undefined;
+
   // Redirect authenticated users
   useEffect(() => {
     if (user) {
@@ -31,7 +39,9 @@ const Signup = () => {
 
   // Initialize EmailJS
   useEffect(() => {
-    emailjs.init("xbyQZEcbAdxv2VNRC");
+    if (EMAILJS_PUBLIC_KEY) {
+      emailjs.init(EMAILJS_PUBLIC_KEY);
+    }
   }, []);
 
   // Load countdown from localStorage on component mount
@@ -84,12 +94,18 @@ const Signup = () => {
     setGeneratedCode(verificationCode);
 
     try {
+      if (!EMAILJS_SERVICE_ID || !EMAILJS_TEMPLATE_ID || !EMAILJS_PUBLIC_KEY) {
+        throw new Error("EmailJS env vars missing: set VITE_EMAILJS_PUBLIC_KEY, VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID");
+      }
+
       await emailjs.send(
-        "service_ce4zn15",
-        "template_6g9zd7b",
+        EMAILJS_SERVICE_ID,
+        EMAILJS_TEMPLATE_ID,
         {
           email: email,
+          to_email: email,
           verification_code: verificationCode,
+          reply_to: email,
         }
       );
 
@@ -136,41 +152,26 @@ const Signup = () => {
     setLoading(true);
     
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/home`
-        }
-      });
+      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      // Create initial profile document
+      await setDoc(doc(db, 'profiles', cred.user.uid), {
+        user_id: cred.user.uid,
+        email: cred.user.email,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, { merge: true });
 
-      if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        // Check if user was immediately confirmed (auto-confirm enabled)
-        if (data.user && !data.user.email_confirmed_at) {
-          toast({
-            title: "Success",
-            description: "Account created successfully! Please check your email to confirm.",
-          });
-        } else {
-          toast({
-            title: "Success",
-            description: "Account created successfully! Redirecting to home...",
-          });
-          setTimeout(() => {
-            window.location.href = "/home";
-          }, 1000);
-        }
-      }
-    } catch (error) {
+      toast({
+        title: "Success",
+        description: "Account created successfully! Redirecting to home...",
+      });
+      setTimeout(() => {
+        window.location.href = "/home";
+      }, 800);
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: error?.message || "Failed to create account",
         variant: "destructive",
       });
     } finally {
@@ -179,17 +180,20 @@ const Signup = () => {
   };
 
   const handleGoogleSignUp = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/home`
-      }
-    });
-    
-    if (error) {
+    try {
+      const provider = new GoogleAuthProvider();
+      const cred = await signInWithPopup(auth, provider);
+      await setDoc(doc(db, 'profiles', cred.user.uid), {
+        user_id: cred.user.uid,
+        email: cred.user.email,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, { merge: true });
+      window.location.href = '/home';
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error?.message || 'Google sign-in failed',
         variant: "destructive",
       });
     }

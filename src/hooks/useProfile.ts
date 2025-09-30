@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/firebase/client';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 import { useAuth } from './useAuth';
 
 interface Profile {
@@ -29,18 +30,29 @@ export const useProfile = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching profile:', error);
-        return;
+      const ref = doc(db, 'profiles', user.uid);
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        setProfile({ id: snap.id, ...(snap.data() as any) });
+      } else {
+        const referralCode = Math.random().toString(36).slice(2, 8).toUpperCase();
+        const referralBase = 'https://definexushq.vercel.app/referral';
+        const payload = {
+          user_id: user.uid,
+          email: user.email || '',
+          wallet_address: '',
+          display_name: '',
+          total_dnx_earned: 0,
+          referrals_count: 0,
+          referral_code: referralCode,
+          referral_link: `${referralBase}/${referralCode}`,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        } as any;
+        await setDoc(ref, payload, { merge: true });
+        const created = await getDoc(ref);
+        setProfile(created.exists() ? { id: created.id, ...(created.data() as any) } : null);
       }
-
-      setProfile(data);
     } catch (error) {
       console.error('Error fetching profile:', error);
     } finally {
@@ -52,20 +64,15 @@ export const useProfile = () => {
     if (!user) return null;
 
     try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .upsert({ 
-          user_id: user.id, 
-          ...updates 
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error updating profile:', error);
-        return null;
-      }
-
+      const ref = doc(db, 'profiles', user.uid);
+      const payload = {
+        user_id: user.uid,
+        updated_at: new Date().toISOString(),
+        ...updates,
+      } as any;
+      await setDoc(ref, payload, { merge: true });
+      const snap = await getDoc(ref);
+      const data = snap.exists() ? { id: snap.id, ...(snap.data() as any) } : null;
       setProfile(data);
       return data;
     } catch (error) {

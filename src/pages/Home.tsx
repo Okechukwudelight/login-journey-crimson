@@ -5,7 +5,8 @@ import { MobileUserMenu } from "@/components/mobile-user-menu";
 import { Bell, Users } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { db } from "@/integrations/firebase/client";
+import { collection, query, where, orderBy, limit, getDocs, updateDoc, doc, addDoc } from 'firebase/firestore';
 const definexusLogo = "/lovable-uploads/bf68da2b-8484-42fd-bf25-c6cfa88cbe26.png";
 
 const Home = () => {
@@ -58,22 +59,17 @@ const Home = () => {
 
   const checkExistingMiningSession = async () => {
     if (!user) return;
-
-    const { data: activeSessions, error } = await supabase
-      .from('mining_sessions')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('is_active', true)
-      .order('created_at', { ascending: false })
-      .limit(1);
-
-    if (error) {
-      console.error('Error checking mining session:', error);
-      return;
-    }
-
-    if (activeSessions && activeSessions.length > 0) {
-      const session = activeSessions[0];
+    const sessionsRef = collection(db, 'mining_sessions');
+    const q = query(
+      sessionsRef,
+      where('user_id', '==', user.uid),
+      where('is_active', '==', true),
+      orderBy('created_at', 'desc'),
+      limit(1)
+    );
+    const snap = await getDocs(q);
+    if (!snap.empty) {
+      const session = { id: snap.docs[0].id, ...(snap.docs[0].data() as any) } as any;
       const startTime = new Date(session.start_time);
       const endTime = new Date(session.end_time);
       const now = new Date();
@@ -101,24 +97,22 @@ const Home = () => {
     const finalDnxEarned = 0.24; // 24 hours * 0.01 DNX/hour
 
     if (sessionId) {
-      // Update existing session
-      await supabase
-        .from('mining_sessions')
-        .update({
-          is_active: false,
-          dnx_earned: finalDnxEarned
-        })
-        .eq('id', sessionId);
+      await updateDoc(doc(db, 'mining_sessions', sessionId), {
+        is_active: false,
+        dnx_earned: finalDnxEarned,
+        updated_at: new Date().toISOString(),
+      });
     } else {
-      // Update current active session
-      await supabase
-        .from('mining_sessions')
-        .update({
+      const sessionsRef = collection(db, 'mining_sessions');
+      const q = query(sessionsRef, where('user_id', '==', user.uid), where('is_active', '==', true), limit(1));
+      const snap = await getDocs(q);
+      if (!snap.empty) {
+        await updateDoc(doc(db, 'mining_sessions', snap.docs[0].id), {
           is_active: false,
-          dnx_earned: finalDnxEarned
-        })
-        .eq('user_id', user.id)
-        .eq('is_active', true);
+          dnx_earned: finalDnxEarned,
+          updated_at: new Date().toISOString(),
+        });
+      }
     }
 
     setIsRunning(false);
@@ -156,20 +150,14 @@ const Home = () => {
     const startTime = new Date();
     const endTime = new Date(startTime.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
 
-    const { error } = await supabase
-      .from('mining_sessions')
-      .insert({
-        user_id: user.id,
-        start_time: startTime.toISOString(),
-        end_time: endTime.toISOString(),
-        dnx_earned: 0,
-        is_active: true
-      });
-
-    if (error) {
-      console.error('Error starting mining session:', error);
-      return;
-    }
+    await addDoc(collection(db, 'mining_sessions'), {
+      user_id: user.uid,
+      start_time: startTime.toISOString(),
+      end_time: endTime.toISOString(),
+      dnx_earned: 0,
+      is_active: true,
+      created_at: new Date().toISOString(),
+    });
 
     setTimeLeft(86400); // 24 hours = 86400 seconds
     setIsRunning(true);

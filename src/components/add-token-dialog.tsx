@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTokens } from "@/hooks/useTokens";
+import { useWalletConnection } from "@/hooks/useWalletConnection";
 import { useToast } from "@/hooks/use-toast";
 import { Plus } from "lucide-react";
 
@@ -11,6 +12,7 @@ export const AddTokenDialog = () => {
   const [open, setOpen] = useState(false);
   const [tokenAddress, setTokenAddress] = useState("");
   const { addCustomToken, loading } = useTokens();
+  const { wallet } = useWalletConnection();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -58,6 +60,9 @@ export const AddTokenDialog = () => {
           <DialogTitle>Add Custom Token</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {wallet && (
+            <div className="text-xs text-muted-foreground break-all">Connected: {wallet.address}</div>
+          )}
           <div className="space-y-2">
             <Label htmlFor="tokenAddress">Token Contract Address</Label>
             <Input

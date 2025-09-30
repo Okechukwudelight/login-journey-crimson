@@ -2,7 +2,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { signInWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { auth } from '@/integrations/firebase/client';
 import { useToast } from "@/hooks/use-toast";
 import { useWalletConnection } from "@/hooks/useWalletConnection";
 import { useAuth } from "@/hooks/useAuth";
@@ -40,28 +41,16 @@ const Signin = () => {
     setLoading(true);
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      await signInWithEmailAndPassword(auth, email, password);
+      toast({
+        title: "Success",
+        description: "Welcome back!",
       });
-
-      if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Success",
-          description: "Welcome back!",
-        });
-        window.location.href = "/home";
-      }
-    } catch (error) {
+      window.location.href = "/home";
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: "An unexpected error occurred",
+        description: error?.message || "Failed to sign in",
         variant: "destructive",
       });
     } finally {
@@ -70,17 +59,14 @@ const Signin = () => {
   };
 
   const handleGoogleSignIn = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/home`
-      }
-    });
-    
-    if (error) {
+    try {
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
+      window.location.href = "/home";
+    } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message,
+        description: error?.message || 'Google sign-in failed',
         variant: "destructive",
       });
     }

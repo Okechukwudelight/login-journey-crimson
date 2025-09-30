@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { db } from '@/integrations/firebase/client';
+import { doc, setDoc, getDoc, collection, query, where, orderBy, getDocs } from 'firebase/firestore';
 import { useAuth } from './useAuth';
 import { ethers } from 'ethers';
 
@@ -32,19 +33,19 @@ export const useTokens = () => {
       const avaxBalance = await provider.getBalance(walletAddress);
       const avaxBalanceFormatted = ethers.formatEther(avaxBalance);
 
-      // Save AVAX token to database
-      await supabase
-        .from('user_tokens')
-        .upsert({
-          user_id: user.id,
-          token_address: '0x0000000000000000000000000000000000000000',
-          token_name: 'Avalanche',
-          token_symbol: 'AVAX',
-          token_image: 'https://cryptologos.cc/logos/avalanche-avax-logo.png',
-          balance: parseFloat(avaxBalanceFormatted),
-          network: 'avalanche'
-        })
-        .select();
+      // Save AVAX token to Firestore (use deterministic doc id)
+      const tokenId = `${user.uid}_0x0000000000000000000000000000000000000000`;
+      await setDoc(doc(db, 'user_tokens', tokenId), {
+        user_id: user.uid,
+        token_address: '0x0000000000000000000000000000000000000000',
+        token_name: 'Avalanche',
+        token_symbol: 'AVAX',
+        token_image: '/src/assets/avalanche-logo.png',
+        balance: parseFloat(avaxBalanceFormatted),
+        network: 'avalanche',
+        updated_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      }, { merge: true });
 
       await fetchUserTokens();
     } catch (error) {
@@ -58,18 +59,23 @@ export const useTokens = () => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .from('user_tokens')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching user tokens:', error);
-        return;
+      const tokensRef = collection(db, 'user_tokens');
+      try {
+        const q = query(tokensRef, where('user_id', '==', user.uid), orderBy('created_at', 'desc'));
+        const snap = await getDocs(q);
+        const rows = snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as any[];
+        setTokens(rows || []);
+      } catch (err: any) {
+        // Fallback if composite index is not yet created
+        if (typeof err?.message === 'string' && err.message.includes('index')) {
+          const qNoOrder = query(tokensRef, where('user_id', '==', user.uid));
+          const snap = await getDocs(qNoOrder);
+          const rows = snap.docs.map(d => ({ id: d.id, ...(d.data() as any) })) as any[];
+          setTokens(rows || []);
+        } else {
+          throw err;
+        }
       }
-
-      setTokens(data || []);
     } catch (error) {
       console.error('Error fetching user tokens:', error);
     }
@@ -149,11 +155,8 @@ export const useTokens = () => {
       const tokenImage = await fetchTokenImageFromCoinGecko(tokenAddress, symbol);
 
       // Get user's wallet address from profile to check balance
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('wallet_address')
-        .eq('user_id', user.id)
-        .single();
+      const profileSnap = await getDoc(doc(db, 'profiles', user.uid));
+      const profile = profileSnap.exists() ? profileSnap.data() as any : null;
 
       let balance = 0;
       if (profile?.wallet_address) {
@@ -166,26 +169,22 @@ export const useTokens = () => {
         }
       }
 
-      const { data, error } = await supabase
-        .from('user_tokens')
-        .upsert({
-          user_id: user.id,
-          token_address: tokenAddress.toLowerCase(),
-          token_name: name,
-          token_symbol: symbol,
-          token_image: tokenImage,
-          balance: balance,
-          network: 'avalanche'
-        })
-        .select()
-        .single();
-
-      if (error) {
-        throw new Error(`Database error: ${error.message}`);
-      }
+      const tokenId = `${user.uid}_${tokenAddress.toLowerCase()}`;
+      await setDoc(doc(db, 'user_tokens', tokenId), {
+        user_id: user.uid,
+        token_address: tokenAddress.toLowerCase(),
+        token_name: name,
+        token_symbol: symbol,
+        token_image: tokenImage,
+        balance: balance,
+        network: 'avalanche',
+        updated_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      }, { merge: true });
 
       await fetchUserTokens();
-      return data;
+      const saved = await getDoc(doc(db, 'user_tokens', tokenId));
+      return saved.exists() ? { id: saved.id, ...(saved.data() as any) } : null;
     } catch (error: any) {
       console.error('Error adding custom token:', error);
       throw new Error(error.message || 'Failed to add token. Please check the contract address.');
@@ -199,21 +198,13 @@ export const useTokens = () => {
 
     try {
       // Check if AVAX token already exists for this user
-      const { data: existingToken } = await supabase
-        .from('user_tokens')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('token_address', '0x0000000000000000000000000000000000000000')
-        .single();
-
-      if (existingToken) return; // AVAX already exists
+      const tokenId = `${user.uid}_0x0000000000000000000000000000000000000000`;
+      const existingToken = await getDoc(doc(db, 'user_tokens', tokenId));
+      if (existingToken.exists()) return; // AVAX already exists
 
       // Get user's wallet address to check AVAX balance
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('wallet_address')
-        .eq('user_id', user.id)
-        .single();
+      const profileSnap = await getDoc(doc(db, 'profiles', user.uid));
+      const profile = profileSnap.exists() ? profileSnap.data() as any : null;
 
       let balance = 0;
       if (profile?.wallet_address) {
@@ -227,17 +218,17 @@ export const useTokens = () => {
       }
 
       // Add AVAX token
-      await supabase
-        .from('user_tokens')
-        .insert({
-          user_id: user.id,
-          token_address: '0x0000000000000000000000000000000000000000',
-          token_name: 'Avalanche',
-          token_symbol: 'AVAX',
-          token_image: 'https://cryptologos.cc/logos/avalanche-avax-logo.png',
-          balance: balance,
-          network: 'avalanche'
-        });
+      await setDoc(doc(db, 'user_tokens', tokenId), {
+        user_id: user.uid,
+        token_address: '0x0000000000000000000000000000000000000000',
+        token_name: 'Avalanche',
+        token_symbol: 'AVAX',
+        token_image: '/src/assets/avalanche-logo.png',
+        balance: balance,
+        network: 'avalanche',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      }, { merge: true });
 
       await fetchUserTokens();
     } catch (error) {

@@ -60,6 +60,19 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Firebase setup
+
+1) In Firebase Console, create a project and a Web App.
+2) Enable Authentication providers: Email/Password and Google.
+3) Create a Firestore database.
+4) Copy the app config into `.env` using `.env.example` keys.
+5) Run the app:
+
+```sh
+npm i
+npm run dev
+```
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/9c345083-63dc-4711-a936-f7bcd745854e) and click on Share -> Publish.

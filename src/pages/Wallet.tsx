@@ -10,11 +10,27 @@ import { useEffect, useState } from "react";
 import { useTokens } from "@/hooks/useTokens";
 import { useProfile } from "@/hooks/useProfile";
 import { AddTokenDialog } from "@/components/add-token-dialog";
+import { useWalletConnection } from "@/hooks/useWalletConnection";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { ethers } from "ethers";
+import { useAuth } from "@/hooks/useAuth";
+import { LogOut } from "lucide-react";
 
 const Wallet = () => {
   const [hasWallet, setHasWallet] = useState(false);
   const { tokens, loading } = useTokens();
   const { profile } = useProfile();
+  const { wallet, disconnect } = useWalletConnection();
+  const { toast } = useToast();
+  const { signOut } = useAuth();
+  const [sendOpen, setSendOpen] = useState(false);
+  const [recvOpen, setRecvOpen] = useState(false);
+  const [toAddress, setToAddress] = useState("");
+  const [amount, setAmount] = useState("");
+  const [sending, setSending] = useState(false);
 
   useEffect(() => {
     // Check if user has connected wallet
@@ -31,6 +47,35 @@ const Wallet = () => {
     return <WalletConnect />;
   }
 
+  const handleSend = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!window.ethereum) return;
+    if (!ethers.isAddress(toAddress)) {
+      toast({ title: 'Invalid address', description: 'Please enter a valid address', variant: 'destructive' });
+      return;
+    }
+    const value = Number(amount);
+    if (!value || value <= 0) {
+      toast({ title: 'Invalid amount', description: 'Enter a positive amount', variant: 'destructive' });
+      return;
+    }
+    setSending(true);
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum as any);
+      const signer = await provider.getSigner();
+      const tx = await signer.sendTransaction({ to: toAddress, value: ethers.parseEther(String(value)) });
+      await tx.wait();
+      toast({ title: 'Sent', description: `Tx: ${tx.hash.slice(0, 10)}...` });
+      setSendOpen(false);
+      setToAddress("");
+      setAmount("");
+    } catch (err: any) {
+      toast({ title: 'Send failed', description: err?.message || 'Transaction error', variant: 'destructive' });
+    } finally {
+      setSending(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <SidebarProvider>
@@ -42,6 +87,11 @@ const Wallet = () => {
 
           {/* Main Content */}
           <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6">
+            <div className="flex justify-end mb-4">
+              <Button variant="ghost" size="icon" onClick={() => disconnect()} aria-label="Disconnect Wallet">
+                <LogOut className="w-5 h-5" />
+              </Button>
+            </div>
             <div className="max-w-4xl mx-auto space-y-6">
 
               {/* Portfolio Value and Action Buttons */}
@@ -54,12 +104,45 @@ const Wallet = () => {
                 </Card>
                 
                 <div className="grid grid-cols-2 gap-3">
-                  <Button variant="outline" className="h-10 px-6 rounded-lg border-[#7D0101] hover:bg-[#7D0101]/10">
-                    <span className="text-sm font-medium">Deposit</span>
-                  </Button>
-                  <Button variant="outline" className="h-10 px-6 rounded-lg border-[#7D0101] hover:bg-[#7D0101]/10">
-                    <span className="text-sm font-medium">Withdraw</span>
-                  </Button>
+                  <Dialog open={recvOpen} onOpenChange={setRecvOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="h-10 px-6 rounded-lg border-[#7D0101] hover:bg-[#7D0101]/10">
+                        <span className="text-sm font-medium">Receive</span>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Your address</DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-2">
+                        <Label>Wallet address</Label>
+                        <Input readOnly value={wallet?.address || ''} onFocus={(e) => e.currentTarget.select()} />
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <Dialog open={sendOpen} onOpenChange={setSendOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="outline" className="h-10 px-6 rounded-lg border-[#7D0101] hover:bg-[#7D0101]/10">
+                        <span className="text-sm font-medium">Send</span>
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Send AVAX</DialogTitle>
+                      </DialogHeader>
+                      <form onSubmit={handleSend} className="space-y-3">
+                        <div className="space-y-1">
+                          <Label>To</Label>
+                          <Input value={toAddress} onChange={(e) => setToAddress(e.target.value)} placeholder="0x..." />
+                        </div>
+                        <div className="space-y-1">
+                          <Label>Amount (AVAX)</Label>
+                          <Input value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.1" />
+                        </div>
+                        <Button type="submit" disabled={sending}>{sending ? 'Sending...' : 'Send'}</Button>
+                      </form>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               </div>
 
@@ -90,11 +173,23 @@ const Wallet = () => {
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                                <img 
-                                  src={token.token_image || "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=400&h=400&fit=crop&crop=center"} 
-                                  alt={token.token_symbol} 
-                                  className="w-10 h-10 rounded-full" 
-                                />
+                                { (token.token_symbol === 'AVAX' || token.token_symbol === 'Avax') ? (
+                                  <img
+                                    src={'/src/assets/avalanche-logo.png'}
+                                    alt={token.token_symbol}
+                                    className="w-10 h-10 rounded-full"
+                                  />
+                                ) : token.token_image ? (
+                                  <img 
+                                    src={token.token_image} 
+                                    alt={token.token_symbol} 
+                                    className="w-10 h-10 rounded-full" 
+                                  />
+                                ) : (
+                                  <div className="w-10 h-10 rounded-full bg-gray-400 flex items-center justify-center text-white text-xs">
+                                    {token.token_symbol?.slice(0, 3) || 'TOK'}
+                                  </div>
+                                )}
                               </div>
                               <div>
                                 <p className="font-medium">{token.token_symbol}</p>
