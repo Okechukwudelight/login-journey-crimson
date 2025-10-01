@@ -75,15 +75,15 @@ const Home = () => {
       const now = new Date();
 
       if (now < endTime) {
-        // Session is still active
-        const remainingSeconds = Math.floor((endTime.getTime() - now.getTime()) / 1000);
-        const elapsedSeconds = Math.floor((now.getTime() - startTime.getTime()) / 1000);
-        const currentRate = (elapsedSeconds / 3600) * 0.01; // 0.01 DNX per hour
+  // Session is still active
+  const remainingSeconds = Math.floor((endTime.getTime() - now.getTime()) / 1000);
+  const elapsedSeconds = Math.floor((now.getTime() - startTime.getTime()) / 1000);
+  const currentRate = (elapsedSeconds / 3600) * 0.01; // 0.01 DNX per hour
 
-        setTimeLeft(remainingSeconds);
-        setIsRunning(true);
-        setDnxRate(currentRate);
-        setTotalDnxEarned(session.dnx_earned);
+  setTimeLeft(remainingSeconds);
+  setIsRunning(true);
+  setDnxRate(currentRate);
+  setTotalDnxEarned(session.dnx_earned);
       } else {
         // Session has expired, mark as completed
         await completeMiningSession(session.id);
@@ -94,7 +94,7 @@ const Home = () => {
   const completeMiningSession = async (sessionId?: string) => {
     if (!user) return;
 
-    const finalDnxEarned = 0.24; // 24 hours * 0.01 DNX/hour
+  const finalDnxEarned = parseFloat((24 * 0.01).toFixed(4)); // 24 hours * 0.01 DNX/hour
 
     if (sessionId) {
       await updateDoc(doc(db, 'mining_sessions', sessionId), {
@@ -116,12 +116,12 @@ const Home = () => {
     }
 
     setIsRunning(false);
-    setDnxRate(0.00000);
-    setTimeLeft(0);
-    // Add earnings to total instead of resetting
-    const newTotal = totalDnxEarned + finalDnxEarned;
-    setTotalDnxEarned(newTotal);
-    localStorage.setItem('totalDnxEarned', newTotal.toString());
+  setDnxRate(0.0000);
+  setTimeLeft(0);
+  // Add earnings to total instead of resetting
+  const newTotal = parseFloat((totalDnxEarned + finalDnxEarned).toFixed(4));
+  setTotalDnxEarned(newTotal);
+  localStorage.setItem('totalDnxEarned', newTotal.toString());
   };
 
   if (loading) {
@@ -151,17 +151,17 @@ const Home = () => {
     const endTime = new Date(startTime.getTime() + 24 * 60 * 60 * 1000); // 24 hours from now
 
     await addDoc(collection(db, 'mining_sessions'), {
-      user_id: user.uid,
-      start_time: startTime.toISOString(),
-      end_time: endTime.toISOString(),
-      dnx_earned: 0,
-      is_active: true,
-      created_at: new Date().toISOString(),
+  user_id: user.uid,
+  start_time: startTime.toISOString(),
+  end_time: endTime.toISOString(),
+  dnx_earned: 0.0000,
+  is_active: true,
+  created_at: new Date().toISOString(),
     });
 
     setTimeLeft(86400); // 24 hours = 86400 seconds
-    setIsRunning(true);
-    setDnxRate(0.00000);
+  setIsRunning(true);
+  setDnxRate(0.0000);
   };
 
   return (
@@ -204,7 +204,7 @@ const Home = () => {
                       <p className="text-gray-600 text-lg font-medium mb-2">Balance</p>
                        <p className="text-4xl md:text-5xl font-bold text-gray-800">
                          <span>{Math.floor(totalDnxEarned)}</span>
-                         <span className="text-2xl">.{totalDnxEarned.toFixed(5).split('.')[1]}</span>
+                         <span className="text-2xl">.{totalDnxEarned.toFixed(4).split('.')[1]}</span>
                        </p>
                       <p className="text-lg font-medium mt-2 flex items-center justify-center gap-1" style={{ color: '#7D0101' }}>
                         0.01 $DNX/hr

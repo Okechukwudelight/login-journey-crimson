@@ -4,9 +4,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { BottomNav } from "@/components/bottom-nav";
 import { LogOut } from "lucide-react";
 import { useEffect } from "react";
+import { User } from "@supabase/supabase-js"; // Adjust the import path based on your project structure
 
 const Profile = () => {
-  const { user, signOut, loading } = useAuth();
+  const { user, signOut, loading } = useAuth() as unknown as { user: (User & { user_metadata?: { avatar?: string; full_name?: string; name?: string } }) | null; signOut: () => Promise<{ readonly error: any }>; loading: boolean };
 
   // Redirect unauthenticated users
   useEffect(() => {
@@ -39,14 +40,14 @@ const Profile = () => {
         <div className="bg-card/50 rounded-2xl p-6 space-y-4">
           <div className="flex items-center gap-4">
             <Avatar className="h-16 w-16">
-              <AvatarImage src={user?.user_metadata?.avatar_url || user?.user_metadata?.picture} />
+              <AvatarImage src={user?.user_metadata?.avatar || '/default-avatar.png'} />
               <AvatarFallback className="bg-primary text-primary-foreground text-xl">
                 {user?.email?.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
             <div>
               <h2 className="text-lg font-semibold text-foreground">
-                {user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0]}
+                {user?.user_metadata?.full_name || user?.user_metadata?.name || user?.email?.split('@')[0] || 'Unknown User'}
               </h2>
               <p className="text-muted-foreground">{user?.email}</p>
             </div>
